@@ -1,0 +1,71 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { Manrope, Space_Grotesk } from "next/font/google";
+
+import { CartDock } from "@/components/cart-dock";
+import { CartLink } from "@/components/cart-link";
+import { CartProvider } from "@/components/cart-provider";
+
+import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+export const metadata: Metadata = {
+  title: "CardPulse",
+  description: "Telegram Mini App storefront for trading cards.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${manrope.variable} ${spaceGrotesk.variable} font-[family-name:var(--font-body)] text-ink antialiased`}
+      >
+        <CartProvider>
+          <div className="mx-auto min-h-screen max-w-7xl px-4 pb-28 pt-3 sm:px-6 lg:px-8">
+            <header className="z-20 mb-6 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-sm md:sticky md:top-3 sm:px-6">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                <nav className="flex items-center justify-start text-sm font-medium text-slate-300">
+                  <Link
+                    href="/browse"
+                    className="rounded-full px-2.5 py-2 hover:bg-white/10 sm:px-3"
+                  >
+                    Browse
+                  </Link>
+                </nav>
+                <Link href="/" className="flex min-w-0 items-center justify-center">
+                  <Image
+                    src="/brand/cardpulse-logo.png"
+                    alt="CardPulse"
+                    width={180}
+                    height={56}
+                    priority
+                    className="h-auto w-[78px] object-contain sm:w-[148px]"
+                  />
+                </Link>
+                <nav className="flex items-center justify-end gap-1 text-sm font-medium text-slate-300 sm:gap-2">
+                  <CartLink />
+                </nav>
+              </div>
+            </header>
+            {children}
+          </div>
+          <CartDock />
+        </CartProvider>
+      </body>
+    </html>
+  );
+}
