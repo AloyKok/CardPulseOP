@@ -21,6 +21,7 @@ type AdminSelectProps = {
 export function AdminSelect({ name, label, value, options, groups }: AdminSelectProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(value);
   const [panelStyle, setPanelStyle] = useState<{ left: number; top: number; width: number } | null>(
@@ -69,7 +70,13 @@ export function AdminSelect({ name, label, value, options, groups }: AdminSelect
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (rootRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return;
+      }
+
+      if (!rootRef.current?.contains(target)) {
         setOpen(false);
       }
     };
@@ -94,13 +101,14 @@ export function AdminSelect({ name, label, value, options, groups }: AdminSelect
       return groups.flatMap((group) => group.options);
     }
 
-      return options ? [...options] : [];
+    return options ? [...options] : [];
   }, [groups, options]);
 
   const dropdownPanel =
     open && panelStyle
       ? createPortal(
           <div
+            ref={panelRef}
             className="fixed z-[100] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_24px_48px_rgba(15,23,42,0.18)]"
             style={{
               left: panelStyle.left,
