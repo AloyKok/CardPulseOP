@@ -1,15 +1,14 @@
 # CardPulse
 
-Telegram Mini App storefront MVP for a trading card business. Built with Next.js App Router, Tailwind CSS, SQLite, and a basic-auth protected admin panel.
+Telegram Mini App storefront MVP for a trading card business. Built with Next.js App Router, Tailwind CSS, Supabase Postgres, and a basic-auth protected admin panel.
 
 ## Features
 
-- Homepage with featured cards, new arrivals, and browse-all sections
-- Browse page with card name/code search and rarity/set/price filters
-- Card detail page with cart-based claim flow
+- Mobile-first browse page with instant search and filter/sort controls
+- Card detail page with quantity selection and cart-based claim flow
 - Client-side cart with copy-to-clipboard export for Telegram
-- SQLite-backed inventory with automatic seeding on first run
-- Admin panel for add, edit, delete, price, quantity, availability, featured state, and image URL/upload
+- Supabase-backed inventory with admin CRUD
+- Basic-auth protected `/admin` panel for inventory management
 
 ## Local setup
 
@@ -19,35 +18,36 @@ Telegram Mini App storefront MVP for a trading card business. Built with Next.js
 npm install
 ```
 
-2. Optional: define admin and Telegram settings in `.env.local`:
+2. Create `.env.local`:
 
 ```bash
+NEXT_PUBLIC_SUPABASE_URL=https://qwkhzkttzajuclxemzka.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_B6x1ek0KRRSygNlHFtdVsw_ir8fwV0E
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=cardpulse
 NEXT_PUBLIC_TELEGRAM_USERNAME=yourtelegramhandle
 ```
 
-3. Start the app:
+`SUPABASE_SERVICE_ROLE_KEY` is strongly recommended for admin writes because the bundled SQL enables public read access only.
+
+3. In Supabase, open the SQL Editor and run [supabase/schema.sql](/Users/aloykok/Documents/CardPulse | Mini App/supabase/schema.sql).
+
+4. Start the app:
 
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000)
+5. Open [http://localhost:3000](http://localhost:3000)
 
-5. Visit `/admin` and sign in with the basic auth credentials above.
+6. Visit `/admin` and sign in with the basic auth credentials above.
 
 ## Database
 
-- SQLite file: `data/cardpulse.db`
-- The database auto-creates the `cards` table and seeds 12 sample cards on first run.
-- Reset the database and restore sample data:
-
-```bash
-npm run db:reset
-```
-
-Then restart the app.
+- Hosted DB: Supabase Postgres
+- Schema + sample seed data: [supabase/schema.sql](/Users/aloykok/Documents/CardPulse | Mini App/supabase/schema.sql)
+- The app expects a `public.cards` table with the fields already defined in that SQL file.
 
 ## Core structure
 
@@ -66,30 +66,39 @@ app/
   layout.tsx
   page.tsx
 components/
+  add-to-cart-button.tsx
+  admin-select.tsx
+  browse-list-item.tsx
   card-card.tsx
   cart-dock.tsx
   cart-link.tsx
   cart-page-client.tsx
   cart-provider.tsx
-  add-to-cart-button.tsx
   empty-state.tsx
   filter-bar.tsx
   section-heading.tsx
   status-badge.tsx
 lib/
-  db.ts
   cart.ts
   queries.ts
+  rarities.ts
   seed-data.ts
+  sets.ts
   telegram.ts
   types.ts
   utils.ts
 middleware.ts
-scripts/
-  reset-db.mjs
+supabase/
+  schema.sql
+utils/
+  supabase/
+    client.ts
+    config.ts
+    middleware.ts
+    server.ts
 ```
 
 ## Notes
 
-- Users now build a cart, copy the cart text, and send it in Telegram manually.
-- Uploaded admin images are stored in `public/uploads/`.
+- Users build a cart, copy the cart text, and send it in Telegram manually.
+- Admin image uploads still save into `public/uploads/`. For production hosting, use stable image URLs or move uploads to Supabase Storage next.

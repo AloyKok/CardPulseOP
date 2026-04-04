@@ -5,10 +5,10 @@ import path from "node:path";
 
 import { revalidatePath } from "next/cache";
 
-import { getDb } from "@/lib/db";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { normalizeSetLabel } from "@/lib/sets";
 import { toBoolean } from "@/lib/utils";
+import { createAdminClient } from "@/utils/supabase/server";
 
 async function saveUploadedFile(file: File) {
   const uploadDir = path.join(process.cwd(), "public", "uploads");
@@ -30,7 +30,7 @@ function normalizeNumber(value: FormDataEntryValue | null, fallback = 0) {
 }
 
 export async function upsertCardAction(formData: FormData) {
-  const db = getDb();
+  const supabase = createAdminClient();
   const id = formData.get("id");
   const upload = formData.get("image_file");
   const currentImageUrl = String(formData.get("current_image_url") || "");
@@ -73,76 +73,43 @@ export async function upsertCardAction(formData: FormData) {
   };
 
   if (id) {
-    db.prepare(
-      `
-      UPDATE cards
-      SET
-        card_name = @card_name,
-        card_code = @card_code,
-        set_code = @set_code,
-        rarity = @rarity,
-        is_alt_art = @is_alt_art,
-        character = @character,
-        language = @language,
-        condition = @condition,
-        price_sgd = @price_sgd,
-        quantity = @quantity,
-        image_url = @image_url,
-        is_available = @is_available,
-        is_featured = @is_featured
-      WHERE id = @id
-    `,
-    ).run({ ...payload, id: Number(id) });
+    const { error } = await supabase
+      .from("cards")
+      .update(payload)
+      .eq("id", Number(id));
+
+    if (error) {
+      throw new Error(`Supabase card update failed: ${error.message}`);
+    }
   } else {
-    db.prepare(
-      `
-      INSERT INTO cards (
-        card_name,
-        card_code,
-        set_code,
-        rarity,
-        is_alt_art,
-        character,
-        language,
-        condition,
-        price_sgd,
-        quantity,
-        image_url,
-        is_available,
-        is_featured,
-        created_at
-      ) VALUES (
-        @card_name,
-        @card_code,
-        @set_code,
-        @rarity,
-        @is_alt_art,
-        @character,
-        @language,
-        @condition,
-        @price_sgd,
-        @quantity,
-        @image_url,
-        @is_available,
-        @is_featured,
-        @created_at
-      )
-    `,
-    ).run({ ...payload, created_at: new Date().toISOString() });
+    const { error } = await supabase.from("cards").insert({
+      ...payload,
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      throw new Error(`Supabase card insert failed: ${error.message}`);
+    }
   }
 
   revalidatePath("/");
   revalidatePath("/browse");
   revalidatePath("/admin");
+  revalidatePath("/cart");
 }
 
 export async function deleteCardAction(formData: FormData) {
-  const db = getDb();
+  const supabase = createAdminClient();
   const id = Number(formData.get("id"));
 
-  db.prepare(`DELETE FROM cards WHERE id = ?`).run(id);
+  const { error } = await supabase.from("cards").delete().eq("id", id);
+
+  if (error) {
+    throw new Error(`Supabase card delete failed: ${error.message}`);
+  }
 
   revalidatePath("/");
   revalidatePath("/browse");
   revalidatePath("/admin");
+  revalidatePath("/cart");
 }

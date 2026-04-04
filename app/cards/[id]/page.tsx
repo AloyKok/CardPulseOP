@@ -15,7 +15,7 @@ type CardDetailPageProps = {
 
 export default async function CardDetailPage({ params }: CardDetailPageProps) {
   const { id } = await params;
-  const card = getCardById(Number(id));
+  const card = await getCardById(Number(id));
 
   if (!card) {
     notFound();

@@ -134,8 +134,8 @@ function CardFormFields({
   );
 }
 
-export default function AdminPage() {
-  const cards = getAdminCards();
+export default async function AdminPage() {
+  const cards = await getAdminCards();
 
   return (
     <main className="space-y-8 pb-10">

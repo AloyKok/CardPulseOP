@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { updateSession } from "@/utils/supabase/middleware";
+
 function unauthorizedResponse() {
   return new NextResponse("Authentication required.", {
     status: 401,
@@ -9,9 +11,9 @@ function unauthorizedResponse() {
   });
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/admin")) {
-    return NextResponse.next();
+    return updateSession(request);
   }
 
   const authHeader = request.headers.get("authorization");
@@ -36,9 +38,9 @@ export function middleware(request: NextRequest) {
     return unauthorizedResponse();
   }
 
-  return NextResponse.next();
+  return updateSession(request);
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

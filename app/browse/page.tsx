@@ -26,8 +26,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     sort: getFilterValue(params.sort),
   };
 
-  const { rarities, sets } = getFilterOptions();
-  const cards = getCards(filters);
+  const [{ rarities, sets }, cards] = await Promise.all([getFilterOptions(), getCards(filters)]);
 
   return (
     <main className="space-y-6 pb-36 md:pb-10">
