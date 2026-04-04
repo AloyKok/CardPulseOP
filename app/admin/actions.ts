@@ -1,8 +1,5 @@
 "use server";
 
-import fs from "node:fs/promises";
-import path from "node:path";
-
 import { revalidatePath } from "next/cache";
 
 import { RARITY_OPTIONS } from "@/lib/rarities";
@@ -10,18 +7,39 @@ import { normalizeSetLabel } from "@/lib/sets";
 import { toBoolean } from "@/lib/utils";
 import { createAdminClient } from "@/utils/supabase/server";
 
+const CARD_IMAGE_BUCKET = "card-images";
+
 async function saveUploadedFile(file: File) {
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(uploadDir, { recursive: true });
+  const supabase = createAdminClient();
+
+  const { error: bucketError } = await supabase.storage.createBucket(CARD_IMAGE_BUCKET, {
+    public: true,
+    allowedMimeTypes: ["image/*"],
+    fileSizeLimit: "10MB",
+  });
+
+  if (bucketError && !bucketError.message.toLowerCase().includes("already")) {
+    throw new Error(`Supabase storage bucket setup failed: ${bucketError.message}`);
+  }
 
   const extension = file.name.split(".").pop() || "jpg";
-  const safeName = `${crypto.randomUUID()}.${extension}`;
-  const destination = path.join(uploadDir, safeName);
+  const safeName = `cards/${crypto.randomUUID()}.${extension}`;
   const bytes = await file.arrayBuffer();
+  const contentType = file.type || "image/jpeg";
 
-  await fs.writeFile(destination, Buffer.from(bytes));
+  const { error: uploadError } = await supabase.storage
+    .from(CARD_IMAGE_BUCKET)
+    .upload(safeName, Buffer.from(bytes), {
+      contentType,
+      upsert: true,
+    });
 
-  return `/uploads/${safeName}`;
+  if (uploadError) {
+    throw new Error(`Supabase image upload failed: ${uploadError.message}`);
+  }
+
+  const { data } = supabase.storage.from(CARD_IMAGE_BUCKET).getPublicUrl(safeName);
+  return data.publicUrl;
 }
 
 function normalizeNumber(value: FormDataEntryValue | null, fallback = 0) {
