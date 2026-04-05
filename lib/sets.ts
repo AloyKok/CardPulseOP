@@ -33,6 +33,7 @@ export const SET_GROUPS = [
     options: [
       "[PRB-01] ONE PIECE CARD THE BEST",
       "[PRB-02] ONE PIECE CARD THE BEST Vol.2",
+      "Starter Decks",
       "Japanese 1st Anniversary Set",
       "Kumamoto Memorial Set (Special Promo)",
     ],
@@ -63,6 +64,7 @@ const setAliases = new Map<string, string>([
   ["EGGHEAD CRISIS", "[EB-04] EGGHEAD CRISIS"],
   ["ONE PIECE CARD THE BEST", "[PRB-01] ONE PIECE CARD THE BEST"],
   ["ONE PIECE CARD THE BEST Vol.2", "[PRB-02] ONE PIECE CARD THE BEST Vol.2"],
+  ["Starter Decks", "Starter Decks"],
 ]);
 
 for (const option of ALL_SET_OPTIONS) {

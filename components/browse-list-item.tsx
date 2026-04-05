@@ -27,21 +27,15 @@ export function BrowseListItem({ card }: BrowseListItemProps) {
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <StatusBadge available={canClaim} />
-              <div className="text-right">
-                <p className="text-[1.28rem] font-semibold leading-none text-ink">
-                  {formatCurrency(card.price_sgd)}
-                </p>
-                <span className="mt-1 inline-block text-slate-300 transition group-hover:text-slate-500">
-                  →
-                </span>
-              </div>
+              <p className="text-[1.28rem] font-semibold leading-none text-ink">
+                {formatCurrency(card.price_sgd)}
+              </p>
             </div>
 
             <h3 className="mt-3 line-clamp-2 text-[1.02rem] font-semibold leading-6 text-ink">
               {card.card_name}
             </h3>
             <p className="mt-1 text-sm font-medium text-stone">{card.card_code}</p>
-            <p className="mt-1 line-clamp-1 text-sm text-slate-500">{card.set_code}</p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-stone">

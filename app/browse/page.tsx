@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
 import { BrowseListItem } from "@/components/browse-list-item";
 import { CardCard } from "@/components/card-card";
 import { FilterBar } from "@/components/filter-bar";
@@ -5,6 +8,8 @@ import { getCards, getFilterOptions } from "@/lib/queries";
 import type { CardFilters } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+const CARDS_PER_PAGE = 20;
 
 type BrowsePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -16,17 +21,51 @@ function getFilterValue(value: string | string[] | undefined) {
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const params = await searchParams;
+  const pageParam = Number(getFilterValue(params.page));
+  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
 
   const filters: CardFilters = {
     query: getFilterValue(params.query),
     rarity: getFilterValue(params.rarity),
+    aa: getFilterValue(params.aa),
     set: getFilterValue(params.set),
     minPrice: getFilterValue(params.minPrice),
     maxPrice: getFilterValue(params.maxPrice),
     sort: getFilterValue(params.sort),
   };
 
-  const [{ rarities, sets }, cards] = await Promise.all([getFilterOptions(), getCards(filters)]);
+  const [{ rarities, sets }, paginatedCards] = await Promise.all([
+    getFilterOptions(),
+    getCards(filters, currentPage, CARDS_PER_PAGE),
+  ]);
+  const { cards, totalCount, totalPages, page } = paginatedCards;
+
+  const baseParams = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    const resolved = Array.isArray(value) ? value[0] : value;
+
+    if (!resolved || key === "page") {
+      continue;
+    }
+
+    baseParams.set(key, resolved);
+  }
+
+  const getPageHref = (nextPage: number) => {
+    const nextParams = new URLSearchParams(baseParams.toString());
+
+    if (nextPage > 1) {
+      nextParams.set("page", String(nextPage));
+    }
+
+    const query = nextParams.toString();
+    return query ? `/browse?${query}` : "/browse";
+  };
+
+  if (totalCount > 0 && currentPage > totalPages) {
+    redirect(getPageHref(totalPages));
+  }
 
   return (
     <main className="space-y-6 pb-36 md:pb-10">
@@ -40,11 +79,14 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         </p>
       </section>
 
-      <FilterBar filters={filters} rarities={rarities} sets={sets} resultCount={cards.length} />
+      <FilterBar filters={filters} rarities={rarities} sets={sets} resultCount={totalCount} />
 
       <section className="space-y-4">
         <div className="hidden items-center justify-between md:flex">
-          <p className="text-sm text-slate-400">{cards.length} cards found</p>
+          <p className="text-sm text-slate-400">
+            {totalCount} cards found
+            {totalPages > 1 ? ` · Page ${page} of ${totalPages}` : ""}
+          </p>
         </div>
         {cards.length > 0 ? (
           <>
@@ -58,6 +100,33 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 <CardCard key={card.id} card={card} />
               ))}
             </div>
+            {totalPages > 1 ? (
+              <div className="flex items-center justify-between gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 text-white">
+                <Link
+                  href={getPageHref(page - 1)}
+                  className={`inline-flex min-h-[44px] items-center justify-center rounded-full border px-4 text-sm font-medium transition ${
+                    page > 1
+                      ? "border-white/15 bg-white/8 hover:bg-white/12"
+                      : "pointer-events-none border-white/8 bg-white/5 text-white/35"
+                  }`}
+                >
+                  Previous
+                </Link>
+                <p className="text-sm font-medium text-slate-300">
+                  Page {page} of {totalPages}
+                </p>
+                <Link
+                  href={getPageHref(page + 1)}
+                  className={`inline-flex min-h-[44px] items-center justify-center rounded-full border px-4 text-sm font-medium transition ${
+                    page < totalPages
+                      ? "border-white/15 bg-white/8 hover:bg-white/12"
+                      : "pointer-events-none border-white/8 bg-white/5 text-white/35"
+                  }`}
+                >
+                  Next
+                </Link>
+              </div>
+            ) : null}
           </>
         ) : (
           <div className="rounded-[1.8rem] border border-white/8 bg-white/[0.04] px-6 py-10 text-center">

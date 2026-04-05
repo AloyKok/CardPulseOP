@@ -3,6 +3,14 @@ import { ALL_SET_OPTIONS, normalizeSetLabel } from "@/lib/sets";
 import type { Card, CardFilters } from "@/lib/types";
 import { createAdminClient } from "@/utils/supabase/server";
 
+export type PaginatedCardsResult = {
+  cards: Card[];
+  totalCount: number;
+  totalPages: number;
+  page: number;
+  perPage: number;
+};
+
 function mapCard(row: Card): Card {
   return {
     ...row,
@@ -83,9 +91,18 @@ export async function getFilterOptions() {
   return { rarities: [...RARITY_OPTIONS], sets };
 }
 
-export async function getCards(filters: CardFilters = {}): Promise<Card[]> {
+export async function getCards(
+  filters: CardFilters = {},
+  page = 1,
+  perPage = 20,
+): Promise<PaginatedCardsResult> {
   const supabase = createAdminClient();
-  let query = supabase.from("cards").select("*");
+  const safePage = Math.max(1, page);
+  const safePerPage = Math.max(1, perPage);
+  const from = (safePage - 1) * safePerPage;
+  const to = from + safePerPage - 1;
+
+  let query = supabase.from("cards").select("*", { count: "exact" });
 
   if (filters.query) {
     const term = sanitizeQueryTerm(filters.query);
@@ -97,6 +114,10 @@ export async function getCards(filters: CardFilters = {}): Promise<Card[]> {
 
   if (filters.rarity) {
     query = query.eq("rarity", filters.rarity);
+  }
+
+  if (filters.aa === "1") {
+    query = query.eq("is_alt_art", 1);
   }
 
   if (filters.set) {
@@ -134,10 +155,19 @@ export async function getCards(filters: CardFilters = {}): Promise<Card[]> {
       break;
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query.range(from, to);
   ensureNoError(error, "card fetch");
 
-  return (data ?? []).map((row) => mapCard(row as Card));
+  const totalCount = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / safePerPage));
+
+  return {
+    cards: (data ?? []).map((row) => mapCard(row as Card)),
+    totalCount,
+    totalPages,
+    page: Math.min(safePage, totalPages),
+    perPage: safePerPage,
+  };
 }
 
 export async function getCardById(id: number): Promise<Card | null> {

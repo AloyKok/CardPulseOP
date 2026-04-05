@@ -27,7 +27,7 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
   return (
     <main className="pb-10">
       <div className="mb-6">
-        <Link href="/browse" className="text-sm font-medium text-stone hover:text-ink">
+        <Link href="/browse" className="text-sm font-medium text-white hover:text-slate-300">
           ← Back to browse
         </Link>
       </div>

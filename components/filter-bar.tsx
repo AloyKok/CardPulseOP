@@ -77,6 +77,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [draftRarity, setDraftRarity] = useState(filters.rarity ?? "");
+  const [draftAa, setDraftAa] = useState(filters.aa ?? "");
   const [draftSet, setDraftSet] = useState(filters.set ?? "");
   const [draftMinPrice, setDraftMinPrice] = useState(filters.minPrice ?? "");
   const [draftMaxPrice, setDraftMaxPrice] = useState(filters.maxPrice ?? "");
@@ -84,13 +85,19 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   useEffect(() => {
     setQuery(filters.query ?? "");
     setDraftRarity(filters.rarity ?? "");
+    setDraftAa(filters.aa ?? "");
     setDraftSet(filters.set ?? "");
     setDraftMinPrice(filters.minPrice ?? "");
     setDraftMaxPrice(filters.maxPrice ?? "");
   }, [filters]);
 
-  const activeFilterCount = [filters.rarity, filters.set, filters.minPrice, filters.maxPrice].filter(Boolean)
-    .length;
+  const activeFilterCount = [
+    filters.rarity,
+    filters.aa,
+    filters.set,
+    filters.minPrice,
+    filters.maxPrice,
+  ].filter(Boolean).length;
 
   const sortLabel = useMemo(
     () => sortOptions.find((option) => option.value === (filters.sort ?? ""))?.label ?? "Newest first",
@@ -106,6 +113,10 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
       } else {
         params.delete(key);
       }
+    }
+
+    if (Object.keys(updates).some((key) => key !== "page")) {
+      params.delete("page");
     }
 
     const nextQuery = params.toString();
@@ -133,11 +144,13 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
 
   const resetFilters = () => {
     setDraftRarity("");
+    setDraftAa("");
     setDraftSet("");
     setDraftMinPrice("");
     setDraftMaxPrice("");
     updateParams({
       rarity: "",
+      aa: "",
       set: "",
       minPrice: "",
       maxPrice: "",
@@ -148,6 +161,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   const applyFilters = () => {
     updateParams({
       rarity: draftRarity,
+      aa: draftAa,
       set: draftSet,
       minPrice: draftMinPrice,
       maxPrice: draftMaxPrice,
@@ -218,7 +232,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
             </button>
           </div>
 
-          <div className="mt-3 hidden grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] gap-3 md:grid">
+          <div className="mt-3 hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.15fr)_auto_minmax(0,1fr)_minmax(0,1fr)] gap-3 md:grid">
             <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-ink">
               {resultCount} cards ready to browse
             </div>
@@ -234,6 +248,15 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
                 </option>
               ))}
             </select>
+            <label className="inline-flex min-h-[48px] items-center gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-ink">
+              <input
+                type="checkbox"
+                checked={filters.aa === "1"}
+                onChange={(event) => updateParams({ aa: event.target.checked ? "1" : "" })}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              AA only
+            </label>
             <select
               value={filters.set ?? ""}
               onChange={(event) => updateParams({ set: event.target.value })}
@@ -268,18 +291,29 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
         onClose={() => setFilterOpen(false)}
       >
         <div className="space-y-4">
-          <select
-            value={draftRarity}
-            onChange={(event) => setDraftRarity(event.target.value)}
-            className={sharedFieldClassName}
-          >
-            <option value="">All rarity</option>
-            {rarities.map((rarity) => (
-              <option key={rarity} value={rarity}>
-                {rarity}
-              </option>
-            ))}
-          </select>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
+            <select
+              value={draftRarity}
+              onChange={(event) => setDraftRarity(event.target.value)}
+              className={sharedFieldClassName}
+            >
+              <option value="">All rarity</option>
+              {rarities.map((rarity) => (
+                <option key={rarity} value={rarity}>
+                  {rarity}
+                </option>
+              ))}
+            </select>
+            <label className="inline-flex min-h-[48px] items-center gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-ink">
+              <input
+                type="checkbox"
+                checked={draftAa === "1"}
+                onChange={(event) => setDraftAa(event.target.checked ? "1" : "")}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              AA
+            </label>
+          </div>
           <select
             value={draftSet}
             onChange={(event) => setDraftSet(event.target.value)}

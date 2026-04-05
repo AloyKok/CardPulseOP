@@ -15,8 +15,8 @@ export function CardCard({ card }: CardCardProps) {
   const rarityLabel = formatRarityLabel(card.rarity, card.is_alt_art);
 
   return (
-    <article className="card-shell group overflow-hidden rounded-[1.75rem]">
-      <Link href={`/cards/${card.id}`} className="block">
+    <article className="card-shell group flex h-full flex-col overflow-hidden rounded-[1.75rem]">
+      <Link href={`/cards/${card.id}`} className="block flex-1">
         <div className="relative aspect-[4/5] overflow-hidden bg-slate-100">
           <img
             src={card.image_url}
@@ -29,24 +29,25 @@ export function CardCard({ card }: CardCardProps) {
           </div>
         </div>
         <div className="space-y-3 p-4">
-          <div className="space-y-1">
-            <h3 className="font-heading text-lg font-semibold tracking-tight text-ink">
+          <div className="space-y-1.5">
+            <h3 className="line-clamp-2 min-h-[3.5rem] font-heading text-lg font-semibold leading-7 tracking-tight text-ink">
               {card.card_name}
             </h3>
-            <p className="text-sm text-stone">
-              {card.card_code} · {card.set_code}
+            <p className="text-sm font-medium text-stone">{card.card_code}</p>
+            <p className="line-clamp-2 min-h-[2.75rem] text-sm leading-5 text-slate-500">
+              {card.set_code}
             </p>
           </div>
-          <div className="flex items-end justify-between">
+          <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-stone">Price</p>
               <p className="text-xl font-semibold text-ink">{formatCurrency(card.price_sgd)}</p>
             </div>
-            <span className="text-sm font-medium text-stone">{card.quantity} in stock</span>
+            <span className="shrink-0 text-sm font-medium text-stone">{card.quantity} in stock</span>
           </div>
         </div>
       </Link>
-      <div className="flex flex-col gap-3 px-4 pb-4 sm:flex-row">
+      <div className="mt-auto space-y-3 px-4 pb-4">
         <AddToCartButton
           card={{
             id: card.id,
@@ -60,9 +61,9 @@ export function CardCard({ card }: CardCardProps) {
             available_quantity: canClaim ? card.quantity : 0,
           }}
           compact
-          className="btn-primary justify-center"
+          className="btn-primary min-w-0 justify-center"
         />
-        <Link href={`/cards/${card.id}`} className="btn-secondary w-full justify-center sm:flex-1">
+        <Link href={`/cards/${card.id}`} className="btn-secondary w-full justify-center">
           Details
         </Link>
       </div>

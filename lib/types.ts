@@ -19,6 +19,7 @@ export type Card = {
 export type CardFilters = {
   query?: string;
   rarity?: string;
+  aa?: string;
   set?: string;
   minPrice?: string;
   maxPrice?: string;
