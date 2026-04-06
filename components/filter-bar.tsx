@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 type FilterBarProps = {
   filters: CardFilters;
   rarities: string[];
+  types: string[];
   sets: string[];
   resultCount: number;
 };
@@ -45,17 +46,17 @@ function MobileSheet({
         onClick={onClose}
         className="absolute inset-0 bg-black/70"
       />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-[2rem] border-t border-slate-200 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-5 shadow-[0_-24px_60px_rgba(0,0,0,0.55)]">
-        <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
+      <div className="absolute inset-x-0 bottom-0 rounded-t-[2rem] border-t border-white/10 bg-[linear-gradient(180deg,rgba(17,17,19,0.98),rgba(9,9,10,0.98))] px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-5 shadow-[0_-24px_60px_rgba(0,0,0,0.62)]">
+        <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-white/12" />
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="font-heading text-2xl font-semibold tracking-tight text-ink">{title}</h2>
-            <p className="mt-1 text-sm text-stone">{subtitle}</p>
+            <h2 className="font-heading text-2xl font-semibold tracking-tight text-white">{title}</h2>
+            <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-stone"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-slate-300"
           >
             <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4 stroke-current" aria-hidden="true">
               <path d="M5 5L15 15M15 5L5 15" strokeWidth="1.8" strokeLinecap="round" />
@@ -68,7 +69,7 @@ function MobileSheet({
   );
 }
 
-export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarProps) {
+export function FilterBar({ filters, rarities, types, sets, resultCount }: FilterBarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -78,6 +79,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   const [sortOpen, setSortOpen] = useState(false);
   const [draftRarity, setDraftRarity] = useState(filters.rarity ?? "");
   const [draftAa, setDraftAa] = useState(filters.aa ?? "");
+  const [draftType, setDraftType] = useState(filters.type ?? "");
   const [draftSet, setDraftSet] = useState(filters.set ?? "");
   const [draftMinPrice, setDraftMinPrice] = useState(filters.minPrice ?? "");
   const [draftMaxPrice, setDraftMaxPrice] = useState(filters.maxPrice ?? "");
@@ -86,6 +88,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
     setQuery(filters.query ?? "");
     setDraftRarity(filters.rarity ?? "");
     setDraftAa(filters.aa ?? "");
+    setDraftType(filters.type ?? "");
     setDraftSet(filters.set ?? "");
     setDraftMinPrice(filters.minPrice ?? "");
     setDraftMaxPrice(filters.maxPrice ?? "");
@@ -94,6 +97,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   const activeFilterCount = [
     filters.rarity,
     filters.aa,
+    filters.type,
     filters.set,
     filters.minPrice,
     filters.maxPrice,
@@ -145,12 +149,14 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   const resetFilters = () => {
     setDraftRarity("");
     setDraftAa("");
+    setDraftType("");
     setDraftSet("");
     setDraftMinPrice("");
     setDraftMaxPrice("");
     updateParams({
       rarity: "",
       aa: "",
+      type: "",
       set: "",
       minPrice: "",
       maxPrice: "",
@@ -162,6 +168,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
     updateParams({
       rarity: draftRarity,
       aa: draftAa,
+      type: draftType,
       set: draftSet,
       minPrice: draftMinPrice,
       maxPrice: draftMaxPrice,
@@ -170,30 +177,27 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
   };
 
   const sharedFieldClassName =
-    "w-full rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:bg-white";
+    "w-full rounded-[1.15rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-white/22 focus:bg-white/[0.08]";
 
   return (
     <>
-      <section className="space-y-4">
+      <section className="space-y-3">
         <div className="space-y-2 md:hidden">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <h1 className="font-heading text-[2rem] font-semibold tracking-tight text-white">
+              <h1 className="font-heading text-[1.85rem] font-semibold tracking-tight text-white">
                 Browse Cards
               </h1>
             </div>
-            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300">
+            <div className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-300">
               {resultCount} listed
             </div>
           </div>
-          <p className="max-w-md text-sm leading-6 text-slate-400">
-            Search fast, scan premium hits, and build your cart without losing your place.
-          </p>
         </div>
 
-        <div className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+        <div className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-3.5 shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-xl">
           <div className="relative">
-            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
               <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5 stroke-current" aria-hidden="true">
                 <path d="M14.5 14.5L18 18" strokeWidth="1.8" strokeLinecap="round" />
                 <circle cx="8.75" cy="8.75" r="5.75" strokeWidth="1.8" />
@@ -205,19 +209,19 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search card name or code"
-              className="w-full rounded-[1.2rem] border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-[15px] text-ink outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:bg-white"
+              className="w-full rounded-[1.2rem] border border-white/10 bg-white/[0.05] py-3.5 pl-12 pr-4 text-[15px] text-white outline-none transition placeholder:text-slate-500 focus:border-white/22 focus:bg-white/[0.08]"
             />
           </div>
 
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3 flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => setFilterOpen(true)}
-              className="inline-flex min-h-[46px] flex-1 items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-ink transition hover:bg-slate-100"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white transition hover:border-white/18 hover:bg-white/[0.09]"
             >
               Filters
               {activeFilterCount > 0 ? (
-                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-black px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[10px] font-semibold text-black">
                   {activeFilterCount}
                 </span>
               ) : null}
@@ -225,15 +229,15 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
             <button
               type="button"
               onClick={() => setSortOpen(true)}
-              className="inline-flex min-h-[46px] flex-1 items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-ink transition hover:bg-slate-100"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white transition hover:border-white/18 hover:bg-white/[0.09]"
             >
               Sort
-              <span className="truncate text-stone">{sortLabel}</span>
+              <span className="truncate text-slate-400">{sortLabel}</span>
             </button>
           </div>
 
-          <div className="mt-3 hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.15fr)_auto_minmax(0,1fr)_minmax(0,1fr)] gap-3 md:grid">
-            <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-ink">
+          <div className="mt-3 hidden grid-cols-[minmax(0,1.2fr)_minmax(0,0.95fr)_auto_minmax(0,0.95fr)_minmax(0,1fr)_minmax(0,1fr)] gap-3 md:grid">
+            <div className="rounded-[1.2rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-slate-200">
               {resultCount} cards ready to browse
             </div>
             <select
@@ -248,15 +252,27 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
                 </option>
               ))}
             </select>
-            <label className="inline-flex min-h-[48px] items-center gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-ink">
+            <label className="inline-flex min-h-[48px] items-center gap-3 rounded-[1.1rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-medium text-white">
               <input
                 type="checkbox"
                 checked={filters.aa === "1"}
                 onChange={(event) => updateParams({ aa: event.target.checked ? "1" : "" })}
-                className="h-4 w-4 rounded border-slate-300"
+                className="h-4 w-4 rounded border-white/20 bg-transparent"
               />
               AA only
             </label>
+            <select
+              value={filters.type ?? ""}
+              onChange={(event) => updateParams({ type: event.target.value })}
+              className={sharedFieldClassName}
+            >
+              <option value="">All types</option>
+              {types.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
             <select
               value={filters.set ?? ""}
               onChange={(event) => updateParams({ set: event.target.value })}
@@ -287,7 +303,7 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
       <MobileSheet
         open={filterOpen}
         title="Filter Cards"
-        subtitle="Narrow inventory by rarity, set, or budget."
+        subtitle="Narrow inventory by type, rarity, set, or budget."
         onClose={() => setFilterOpen(false)}
       >
         <div className="space-y-4">
@@ -304,16 +320,28 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
                 </option>
               ))}
             </select>
-            <label className="inline-flex min-h-[48px] items-center gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-ink">
+            <label className="inline-flex min-h-[48px] items-center gap-3 rounded-[1.1rem] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-medium text-white">
               <input
                 type="checkbox"
                 checked={draftAa === "1"}
                 onChange={(event) => setDraftAa(event.target.checked ? "1" : "")}
-                className="h-4 w-4 rounded border-slate-300"
+                className="h-4 w-4 rounded border-white/20 bg-transparent"
               />
               AA
             </label>
           </div>
+          <select
+            value={draftType}
+            onChange={(event) => setDraftType(event.target.value)}
+            className={sharedFieldClassName}
+          >
+            <option value="">All types</option>
+            {types.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
           <select
             value={draftSet}
             onChange={(event) => setDraftSet(event.target.value)}
@@ -350,14 +378,14 @@ export function FilterBar({ filters, rarities, sets, resultCount }: FilterBarPro
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-ink"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white"
             >
               Reset
             </button>
             <button
               type="button"
               onClick={applyFilters}
-              className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full bg-black px-4 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)]"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-black shadow-[0_12px_24px_rgba(255,255,255,0.14)]"
             >
               Apply filters
             </button>

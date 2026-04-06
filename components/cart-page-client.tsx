@@ -40,7 +40,8 @@ export function CartPageClient() {
             Your cart is empty.
           </h1>
           <p className="mt-3 max-w-xl text-stone">
-            Add cards from the browse page or a card detail page, then copy the list and send it in Telegram.
+            Add cards from the browse page or a card detail page, then copy the list and send it in
+            Telegram to @beppooo.
           </p>
           <Link href="/browse" className="btn-primary mt-6">
             Browse inventory
@@ -58,7 +59,7 @@ export function CartPageClient() {
           Review your claim list.
         </h1>
         <p className="max-w-2xl text-stone">
-          Adjust quantities, copy the cart text, then paste it into Telegram and send it manually.
+          Adjust quantities, copy the cart text, then paste it into Telegram and send it to @beppooo.
         </p>
       </section>
 
@@ -88,6 +89,8 @@ export function CartPageClient() {
 
                     <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-stone">
                       <span>{item.rarity}</span>
+                      <span className="text-slate-300">•</span>
+                      <span>{item.card_type}</span>
                       <span className="text-slate-300">•</span>
                       <span>{item.set_code}</span>
                     </div>
@@ -157,6 +160,9 @@ export function CartPageClient() {
             <button type="button" onClick={handleCopy} className="btn-primary w-full">
               {copied ? "Copied" : "Copy cart items"}
             </button>
+            <p className="text-center text-sm text-stone">
+              After copying, open Telegram and message <span className="font-semibold text-ink">@beppooo</span>.
+            </p>
             <button
               type="button"
               onClick={clearCart}

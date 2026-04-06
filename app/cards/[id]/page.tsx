@@ -41,6 +41,7 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
         </div>
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-3">
+            <span className="pill bg-slate-100 text-slate-700">{card.card_type}</span>
             <span className="pill bg-slate-100 text-ink">{rarityLabel}</span>
             <span className="pill bg-slate-100 text-slate-700">{card.set_code}</span>
             <StatusBadge available={canClaim} />
@@ -66,6 +67,7 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
                   card_name: card.card_name,
                   card_code: card.card_code,
                   set_code: card.set_code,
+                  card_type: card.card_type,
                   rarity: rarityLabel,
                   is_alt_art: card.is_alt_art,
                   price_sgd: card.price_sgd,
@@ -83,6 +85,10 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
           </div>
 
           <dl className="grid gap-3 rounded-[1.5rem] bg-slate-50 p-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs uppercase tracking-[0.22em] text-stone">Card Type</dt>
+              <dd className="mt-1 font-medium text-ink">{card.card_type}</dd>
+            </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.22em] text-stone">Character</dt>
               <dd className="mt-1 font-medium text-ink">{card.character}</dd>

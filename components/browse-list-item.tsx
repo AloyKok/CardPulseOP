@@ -17,31 +17,37 @@ export function BrowseListItem({ card }: BrowseListItemProps) {
     <article className="group">
       <Link
         href={`/cards/${card.id}`}
-        className="block rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_16px_36px_rgba(0,0,0,0.16)] transition duration-200 hover:border-slate-300 hover:bg-white"
+        className="block rounded-[1.65rem] border border-slate-200 bg-white p-3.5 shadow-[0_18px_36px_rgba(0,0,0,0.18)] transition duration-200 hover:border-slate-300 hover:bg-white"
       >
-        <div className="flex items-start gap-4">
-          <div className="relative aspect-[3/4] w-[92px] shrink-0 overflow-hidden rounded-[1.2rem] border border-slate-200 bg-slate-100 shadow-[0_10px_20px_rgba(15,23,42,0.12)]">
+        <div className="flex items-start gap-3.5">
+          <div className="relative aspect-[3/4] w-[88px] shrink-0 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-slate-100 shadow-[0_12px_24px_rgba(15,23,42,0.12)]">
             <img src={card.image_url} alt={card.card_name} className="h-full w-full object-cover" />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <StatusBadge available={canClaim} />
-              <p className="text-[1.28rem] font-semibold leading-none text-ink">
-                {formatCurrency(card.price_sgd)}
-              </p>
+              <div className="text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Price</p>
+                <p className="mt-1 text-[1.35rem] font-semibold leading-none text-ink">
+                  {formatCurrency(card.price_sgd)}
+                </p>
+              </div>
             </div>
 
-            <h3 className="mt-3 line-clamp-2 text-[1.02rem] font-semibold leading-6 text-ink">
+            <h3 className="mt-3 line-clamp-2 text-[1.04rem] font-semibold leading-6 text-ink">
               {card.card_name}
             </h3>
-            <p className="mt-1 text-sm font-medium text-stone">{card.card_code}</p>
+            <p className="mt-1 text-sm font-medium text-slate-400">{card.card_code}</p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-stone">
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
+                {card.card_type}
+              </span>
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone">
                 {rarityLabel}
               </span>
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500">
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
                 {card.quantity} in stock
               </span>
             </div>

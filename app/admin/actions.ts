@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { CARD_TYPE_OPTIONS, normalizeCardType } from "@/lib/card-types";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { normalizeSetLabel } from "@/lib/sets";
 import { toBoolean } from "@/lib/utils";
@@ -72,12 +73,17 @@ export async function upsertCardAction(formData: FormData) {
   const rarity = RARITY_OPTIONS.includes(rarityInput as (typeof RARITY_OPTIONS)[number])
     ? rarityInput
     : "R";
+  const cardTypeInput = String(formData.get("card_type") || "").trim();
+  const cardType = CARD_TYPE_OPTIONS.includes(cardTypeInput as (typeof CARD_TYPE_OPTIONS)[number])
+    ? cardTypeInput
+    : normalizeCardType(cardTypeInput);
   const isAltArt = toBoolean(formData.get("is_alt_art")) ? 1 : 0;
 
   const payload = {
     card_name: String(formData.get("card_name") || "").trim(),
     card_code: String(formData.get("card_code") || "").trim(),
     set_code: normalizeSetLabel(String(formData.get("set_code") || "").trim()),
+    card_type: cardType,
     rarity,
     is_alt_art: isAltArt,
     character: String(formData.get("character") || "").trim(),

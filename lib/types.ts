@@ -3,6 +3,7 @@ export type Card = {
   card_name: string;
   card_code: string;
   set_code: string;
+  card_type: string;
   rarity: string;
   is_alt_art: number;
   character: string;
@@ -20,6 +21,7 @@ export type CardFilters = {
   query?: string;
   rarity?: string;
   aa?: string;
+  type?: string;
   set?: string;
   minPrice?: string;
   maxPrice?: string;
@@ -31,6 +33,7 @@ export type CartItem = {
   card_name: string;
   card_code: string;
   set_code: string;
+  card_type: string;
   rarity: string;
   is_alt_art: number;
   price_sgd: number;

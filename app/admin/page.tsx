@@ -1,5 +1,6 @@
 import { deleteCardAction, upsertCardAction } from "@/app/admin/actions";
 import { AdminSelect } from "@/components/admin-select";
+import { CARD_TYPE_OPTIONS } from "@/lib/card-types";
 import { getAdminCards } from "@/lib/queries";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { SET_GROUPS, normalizeSetLabel } from "@/lib/sets";
@@ -15,6 +16,7 @@ function CardFormFields({
     card_name?: string;
     card_code?: string;
     set_code?: string;
+    card_type?: string;
     rarity?: string;
     is_alt_art?: number;
     character?: string;
@@ -46,6 +48,14 @@ function CardFormFields({
           label="Set"
           value={normalizeSetLabel(defaults?.set_code ?? SET_GROUPS[0].options[0])}
           groups={SET_GROUPS}
+        />
+      </div>
+      <div>
+        <AdminSelect
+          name="card_type"
+          label="Card Type"
+          value={defaults?.card_type ?? CARD_TYPE_OPTIONS[0]}
+          options={CARD_TYPE_OPTIONS}
         />
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
@@ -176,7 +186,7 @@ export default async function AdminPage() {
                 <div className="min-w-0">
                   <p className="font-heading text-xl font-semibold text-ink">{card.card_name}</p>
                   <p className="text-sm text-stone">
-                    {card.card_code} · {card.set_code} · {formatCurrency(card.price_sgd)}
+                    {card.card_code} · {card.card_type} · {card.set_code} · {formatCurrency(card.price_sgd)}
                   </p>
                 </div>
                 <div className="text-right text-sm text-stone">

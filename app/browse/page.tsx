@@ -28,13 +28,14 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     query: getFilterValue(params.query),
     rarity: getFilterValue(params.rarity),
     aa: getFilterValue(params.aa),
+    type: getFilterValue(params.type),
     set: getFilterValue(params.set),
     minPrice: getFilterValue(params.minPrice),
     maxPrice: getFilterValue(params.maxPrice),
     sort: getFilterValue(params.sort),
   };
 
-  const [{ rarities, sets }, paginatedCards] = await Promise.all([
+  const [{ rarities, sets, types }, paginatedCards] = await Promise.all([
     getFilterOptions(),
     getCards(filters, currentPage, CARDS_PER_PAGE),
   ]);
@@ -68,18 +69,24 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   }
 
   return (
-    <main className="space-y-6 pb-36 md:pb-10">
+    <main className="space-y-5 pb-40 md:space-y-6 md:pb-12">
       <section className="hidden space-y-3 md:block">
         <p className="text-xs font-bold uppercase tracking-[0.28em] text-white">Inventory</p>
         <h1 className="font-heading text-4xl font-semibold tracking-tight text-white">
           Browse the CardPulse catalog.
         </h1>
         <p className="max-w-2xl text-slate-400">
-          Search card names or codes, then narrow the list by rarity, set, price, and sort order.
+          Search card names or codes, then narrow the list by type, rarity, set, price, and sort order.
         </p>
       </section>
 
-      <FilterBar filters={filters} rarities={rarities} sets={sets} resultCount={totalCount} />
+      <FilterBar
+        filters={filters}
+        rarities={rarities}
+        types={types}
+        sets={sets}
+        resultCount={totalCount}
+      />
 
       <section className="space-y-4">
         <div className="hidden items-center justify-between md:flex">
@@ -129,7 +136,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
             ) : null}
           </>
         ) : (
-          <div className="rounded-[1.8rem] border border-white/8 bg-white/[0.04] px-6 py-10 text-center">
+          <div className="rounded-[1.8rem] border border-white/8 bg-white/[0.03] px-6 py-10 text-center shadow-[0_20px_46px_rgba(0,0,0,0.28)]">
             <h3 className="font-heading text-xl font-semibold text-white">No cards match these filters.</h3>
             <p className="mt-2 text-slate-400">
               Try widening the search or clearing one of the active filters.

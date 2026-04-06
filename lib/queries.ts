@@ -1,3 +1,4 @@
+import { CARD_TYPE_OPTIONS, normalizeCardType } from "@/lib/card-types";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { ALL_SET_OPTIONS, normalizeSetLabel } from "@/lib/sets";
 import type { Card, CardFilters } from "@/lib/types";
@@ -15,6 +16,7 @@ function mapCard(row: Card): Card {
   return {
     ...row,
     id: Number(row.id),
+    card_type: normalizeCardType(String(row.card_type ?? "")),
     is_alt_art: Number(row.is_alt_art),
     price_sgd: Number(row.price_sgd),
     quantity: Number(row.quantity),
@@ -81,14 +83,16 @@ export async function getInventoryCount() {
 
 export async function getFilterOptions() {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from("cards").select("set_code");
+  const { data, error } = await supabase.from("cards").select("set_code, card_type");
 
   ensureNoError(error, "filter option fetch");
 
   const dbSets = (data ?? []).map((row) => normalizeSetLabel(String(row.set_code)));
+  const dbTypes = (data ?? []).map((row) => normalizeCardType(String(row.card_type ?? "")));
   const sets = [...new Set([...ALL_SET_OPTIONS, ...dbSets])];
+  const types = [...new Set([...CARD_TYPE_OPTIONS, ...dbTypes])];
 
-  return { rarities: [...RARITY_OPTIONS], sets };
+  return { rarities: [...RARITY_OPTIONS], sets, types };
 }
 
 export async function getCards(
@@ -118,6 +122,10 @@ export async function getCards(
 
   if (filters.aa === "1") {
     query = query.eq("is_alt_art", 1);
+  }
+
+  if (filters.type) {
+    query = query.eq("card_type", normalizeCardType(filters.type));
   }
 
   if (filters.set) {

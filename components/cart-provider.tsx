@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { normalizeCardType } from "@/lib/card-types";
 import {
   CART_STORAGE_KEY,
   clampCartQuantity,
@@ -42,7 +43,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const stored = window.localStorage.getItem(CART_STORAGE_KEY);
 
       if (stored) {
-        setItems(JSON.parse(stored) as CartItem[]);
+        const parsed = JSON.parse(stored) as CartItem[];
+        setItems(
+          parsed.map((item) => ({
+            ...item,
+            card_type: normalizeCardType(String(item.card_type ?? "")),
+          })),
+        );
       }
     } catch {
       window.localStorage.removeItem(CART_STORAGE_KEY);
