@@ -35,13 +35,13 @@ export default function RootLayout({
         className={`${manrope.variable} ${spaceGrotesk.variable} font-[family-name:var(--font-body)] text-ink antialiased`}
       >
         <CartProvider>
-          <div className="mx-auto min-h-screen max-w-7xl px-4 pb-32 pt-2 sm:px-6 lg:px-8">
-            <header className="z-20 mb-5 rounded-[1.35rem] border border-white/10 bg-white/5 px-3 py-2 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-sm md:sticky md:top-3 sm:px-5">
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2.5">
+          <div className="mx-auto min-h-screen max-w-7xl px-4 pb-32 pt-1.5 sm:px-6 lg:px-8">
+            <header className="z-20 mb-3 rounded-[1.1rem] border border-white/10 bg-white/5 px-2.5 py-1 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-sm md:sticky md:top-2 sm:px-3.5">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5">
                 <nav className="flex items-center justify-start text-sm font-medium text-slate-300">
                   <Link
                     href="/browse"
-                    className="rounded-full px-2.5 py-1.5 hover:bg-white/10 sm:px-3"
+                    className="rounded-full px-2 py-0.5 hover:bg-white/10 sm:px-2.5"
                   >
                     Browse
                   </Link>
@@ -53,7 +53,7 @@ export default function RootLayout({
                     width={208}
                     height={64}
                     priority
-                    className="h-auto w-[96px] object-contain sm:w-[164px]"
+                    className="h-auto w-[92px] object-contain sm:w-[156px]"
                   />
                 </Link>
                 <nav className="flex items-center justify-end gap-1 text-sm font-medium text-slate-300 sm:gap-2">
