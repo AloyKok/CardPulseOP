@@ -53,21 +53,18 @@ export async function upsertCardAction(formData: FormData) {
   const id = formData.get("id");
   const upload = formData.get("image_file");
   const currentImageUrl = String(formData.get("current_image_url") || "");
-  const imageUrlInput = String(formData.get("image_url") || "").trim();
-
-  let imageUrl = imageUrlInput || currentImageUrl;
+  let imageUrl = currentImageUrl;
 
   if (upload instanceof File && upload.size > 0) {
     imageUrl = await saveUploadedFile(upload);
   }
 
   if (!imageUrl) {
-    throw new Error("Image URL or upload is required.");
+    throw new Error("Image upload is required.");
   }
 
   const quantity = normalizeNumber(formData.get("quantity"));
-  const requestedAvailability = toBoolean(formData.get("is_available"));
-  const isAvailable = requestedAvailability && quantity > 0 ? 1 : 0;
+  const isAvailable = quantity > 0 ? 1 : 0;
   const isFeatured = toBoolean(formData.get("is_featured")) ? 1 : 0;
   const rarityInput = String(formData.get("rarity") || "").trim();
   const rarity = RARITY_OPTIONS.includes(rarityInput as (typeof RARITY_OPTIONS)[number])

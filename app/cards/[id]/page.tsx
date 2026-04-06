@@ -21,7 +21,7 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
     notFound();
   }
 
-  const canClaim = Boolean(card.is_available && card.quantity > 0);
+  const canClaim = card.quantity > 0;
   const rarityLabel = formatRarityLabel(card.rarity, card.is_alt_art);
 
   return (
@@ -111,7 +111,7 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.22em] text-stone">Availability</dt>
-              <dd className="mt-1 font-medium text-ink">{canClaim ? "Available" : "Sold"}</dd>
+              <dd className="mt-1 font-medium text-ink">{canClaim ? "Available" : "Sold Out"}</dd>
             </div>
           </dl>
         </div>

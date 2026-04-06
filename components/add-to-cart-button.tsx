@@ -67,7 +67,7 @@ export function AddToCartButton({
         disabled={isDisabled}
         className={`${buttonClassName} ${isDisabled ? "cursor-not-allowed opacity-40" : ""}`}
       >
-        {isDisabled ? "Sold" : added ? "Added" : compact ? label : `${label} (${quantity})`}
+        {isDisabled ? "Sold Out" : added ? "Added" : compact ? label : `${label} (${quantity})`}
       </button>
     </div>
   );

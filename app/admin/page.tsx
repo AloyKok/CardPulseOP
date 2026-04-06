@@ -1,7 +1,7 @@
 import { deleteCardAction, upsertCardAction } from "@/app/admin/actions";
 import { AdminSelect } from "@/components/admin-select";
 import { CARD_TYPE_OPTIONS } from "@/lib/card-types";
-import { getAdminCards } from "@/lib/queries";
+import { getAdminCardsByQuery } from "@/lib/queries";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { SET_GROUPS, normalizeSetLabel } from "@/lib/sets";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -25,7 +25,6 @@ function CardFormFields({
     price_sgd?: number;
     quantity?: number;
     image_url?: string;
-    is_available?: number;
     is_featured?: number;
   };
 }) {
@@ -115,22 +114,19 @@ function CardFormFields({
         />
       </div>
       <div className="md:col-span-2">
-        <label className="mb-2 block text-sm font-medium text-stone">Image URL</label>
-        <input name="image_url" defaultValue={defaults?.image_url} className="field" />
-      </div>
-      <div className="md:col-span-2">
         <label className="mb-2 block text-sm font-medium text-stone">Upload Image</label>
-        <input name="image_file" type="file" accept="image/*" className="field file:mr-4 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium" />
-      </div>
-      <label className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-ink">
         <input
-          name="is_available"
-          type="checkbox"
-          defaultChecked={Boolean(defaults?.is_available ?? 1)}
-          className="h-4 w-4 rounded border-slate-300"
+          name="image_file"
+          type="file"
+          accept="image/*"
+          className="field file:mr-4 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium"
         />
-        Available
-      </label>
+        <p className="mt-2 text-xs text-stone">
+          {defaults?.id
+            ? "Upload a new image only if you want to replace the current one."
+            : "Upload is required for new cards."}
+        </p>
+      </div>
       <label className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-ink">
         <input
           name="is_featured"
@@ -144,8 +140,18 @@ function CardFormFields({
   );
 }
 
-export default async function AdminPage() {
-  const cards = await getAdminCards();
+type AdminPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function getSearchValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const params = await searchParams;
+  const query = (getSearchValue(params.query) ?? "").trim();
+  const cards = await getAdminCardsByQuery(query);
 
   return (
     <main className="space-y-8 pb-10">
@@ -155,7 +161,7 @@ export default async function AdminPage() {
           Manage CardPulse inventory.
         </h1>
         <p className="max-w-2xl text-stone">
-          Add cards, update price and stock, toggle sold status, and remove old listings.
+          Add cards, update price and stock, and cards with zero quantity will show as sold out automatically.
         </p>
       </section>
 
@@ -175,9 +181,35 @@ export default async function AdminPage() {
       </section>
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-heading text-2xl font-semibold">Current inventory</h2>
-          <p className="text-sm text-stone">{cards.length} total cards</p>
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-heading text-2xl font-semibold">Current inventory</h2>
+              <p className="text-sm text-stone">
+                {query ? `${cards.length} matching cards` : `${cards.length} total cards`}
+              </p>
+            </div>
+            <form action="/admin" className="flex w-full max-w-xl items-center gap-3">
+              <input
+                type="search"
+                name="query"
+                defaultValue={query}
+                placeholder="Search by card name, code, or set"
+                className="field min-h-[48px] flex-1"
+              />
+              <button type="submit" className="btn-primary shrink-0">
+                Search
+              </button>
+              {query ? (
+                <a
+                  href="/admin"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-ink transition hover:bg-white"
+                >
+                  Clear
+                </a>
+              ) : null}
+            </form>
+          </div>
         </div>
         <div className="space-y-4">
           {cards.map((card) => (
@@ -190,7 +222,7 @@ export default async function AdminPage() {
                   </p>
                 </div>
                 <div className="text-right text-sm text-stone">
-                  <p>{card.quantity > 0 && card.is_available ? "Available" : "Sold"}</p>
+                  <p>{card.quantity > 0 ? "Available" : "Sold Out"}</p>
                   <p>Added {formatDate(card.created_at)}</p>
                 </div>
               </summary>

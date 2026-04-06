@@ -14,7 +14,7 @@ export function StatusBadge({ available }: StatusBadgeProps) {
           : "border border-slate-200 bg-slate-100 text-slate-500",
       )}
     >
-      {available ? "Available" : "Sold"}
+      {available ? "Available" : "Sold Out"}
     </span>
   );
 }

@@ -10,7 +10,7 @@ type BrowseListItemProps = {
 };
 
 export function BrowseListItem({ card }: BrowseListItemProps) {
-  const canClaim = Boolean(card.is_available && card.quantity > 0);
+  const canClaim = card.quantity > 0;
   const rarityLabel = formatRarityLabel(card.rarity, card.is_alt_art);
 
   return (

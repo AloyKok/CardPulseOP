@@ -13,14 +13,16 @@ export type PaginatedCardsResult = {
 };
 
 function mapCard(row: Card): Card {
+  const quantity = Number(row.quantity);
+
   return {
     ...row,
     id: Number(row.id),
     card_type: normalizeCardType(String(row.card_type ?? "")),
     is_alt_art: Number(row.is_alt_art),
     price_sgd: Number(row.price_sgd),
-    quantity: Number(row.quantity),
-    is_available: Number(row.is_available),
+    quantity,
+    is_available: quantity > 0 ? 1 : 0,
     is_featured: Number(row.is_featured),
   };
 }
@@ -191,5 +193,25 @@ export async function getAdminCards(): Promise<Card[]> {
   const { data, error } = await supabase.from("cards").select("*").order("created_at", { ascending: false });
 
   ensureNoError(error, "admin card fetch");
+  return (data ?? []).map((row) => mapCard(row as Card));
+}
+
+export async function getAdminCardsByQuery(queryTerm = ""): Promise<Card[]> {
+  const supabase = createAdminClient();
+  const term = sanitizeQueryTerm(queryTerm);
+
+  let query = supabase.from("cards").select("*");
+
+  if (term) {
+    query = query.or(
+      `card_name.ilike.%${term}%,card_code.ilike.%${term}%,set_code.ilike.%${term}%`,
+    );
+  }
+
+  const { data, error } = await query
+    .order("is_available", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  ensureNoError(error, "admin card search");
   return (data ?? []).map((row) => mapCard(row as Card));
 }
