@@ -9,7 +9,7 @@ type NewArrivalsCarouselProps = {
   cards: Card[];
 };
 
-const AUTO_SCROLL_PX_PER_SECOND = 22;
+const AUTO_SCROLL_PX_PER_SECOND = 34;
 const RESUME_DELAY_MS = 2200;
 
 export function NewArrivalsCarousel({ cards }: NewArrivalsCarouselProps) {
@@ -17,6 +17,7 @@ export function NewArrivalsCarousel({ cards }: NewArrivalsCarouselProps) {
   const pauseUntilRef = useRef(0);
   const isPointerDownRef = useRef(false);
   const initializedRef = useRef(false);
+  const targetScrollLeftRef = useRef(0);
 
   const loopCards = useMemo(() => {
     if (cards.length <= 1) {
@@ -52,16 +53,19 @@ export function NewArrivalsCarousel({ cards }: NewArrivalsCarouselProps) {
       }
 
       if (!initializedRef.current) {
+        targetScrollLeftRef.current = segmentWidth;
         container.scrollLeft = segmentWidth;
         initializedRef.current = true;
         return;
       }
 
-      if (container.scrollLeft < segmentWidth * 0.5) {
-        container.scrollLeft += segmentWidth;
-      } else if (container.scrollLeft > segmentWidth * 1.5) {
-        container.scrollLeft -= segmentWidth;
+      if (targetScrollLeftRef.current < segmentWidth * 0.5) {
+        targetScrollLeftRef.current += segmentWidth;
+      } else if (targetScrollLeftRef.current > segmentWidth * 1.5) {
+        targetScrollLeftRef.current -= segmentWidth;
       }
+
+      container.scrollLeft = targetScrollLeftRef.current;
     };
 
     const pauseAutoScroll = (duration = RESUME_DELAY_MS) => {
@@ -79,7 +83,7 @@ export function NewArrivalsCarousel({ cards }: NewArrivalsCarouselProps) {
       normalizeScrollPosition();
 
       if (!isPointerDownRef.current && time >= pauseUntilRef.current) {
-        container.scrollLeft += (AUTO_SCROLL_PX_PER_SECOND * delta) / 1000;
+        targetScrollLeftRef.current += (AUTO_SCROLL_PX_PER_SECOND * delta) / 1000;
         normalizeScrollPosition();
       }
 
@@ -88,33 +92,43 @@ export function NewArrivalsCarousel({ cards }: NewArrivalsCarouselProps) {
 
     const handlePointerDown = () => {
       isPointerDownRef.current = true;
+      targetScrollLeftRef.current = container.scrollLeft;
       pauseAutoScroll();
     };
 
     const handlePointerUp = () => {
       isPointerDownRef.current = false;
+      targetScrollLeftRef.current = container.scrollLeft;
       pauseAutoScroll();
     };
 
     const handleTouchStart = () => {
       isPointerDownRef.current = true;
+      targetScrollLeftRef.current = container.scrollLeft;
       pauseAutoScroll();
     };
 
     const handleTouchEnd = () => {
       isPointerDownRef.current = false;
+      targetScrollLeftRef.current = container.scrollLeft;
       pauseAutoScroll();
     };
 
     const handleWheel = () => {
+      targetScrollLeftRef.current = container.scrollLeft;
       pauseAutoScroll();
     };
 
+    const handleScroll = () => {
+      targetScrollLeftRef.current = container.scrollLeft;
+    };
+
     normalizeScrollPosition();
-    pauseAutoScroll(1200);
+    pauseAutoScroll(250);
 
     container.addEventListener("pointerdown", handlePointerDown);
     container.addEventListener("wheel", handleWheel, { passive: true });
+    container.addEventListener("scroll", handleScroll, { passive: true });
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("pointerup", handlePointerUp);
     window.addEventListener("touchend", handleTouchEnd);
@@ -126,6 +140,7 @@ export function NewArrivalsCarousel({ cards }: NewArrivalsCarouselProps) {
       window.cancelAnimationFrame(frameId);
       container.removeEventListener("pointerdown", handlePointerDown);
       container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("scroll", handleScroll);
       container.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("touchend", handleTouchEnd);
