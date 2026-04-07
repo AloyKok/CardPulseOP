@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FreshnessBadge } from "@/components/freshness-badge";
 import { StatusBadge } from "@/components/status-badge";
 import { formatRarityLabel } from "@/lib/rarities";
 import { formatCurrency } from "@/lib/utils";
@@ -41,6 +42,7 @@ export function BrowseListItem({ card }: BrowseListItemProps) {
             <p className="mt-1 text-sm font-medium text-slate-400">{card.card_code}</p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
+              <FreshnessBadge listedAt={card.created_at} />
               <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
                 {card.card_type}
               </span>

@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { BrowseListItem } from "@/components/browse-list-item";
 import { CardCard } from "@/components/card-card";
 import { FilterBar } from "@/components/filter-bar";
-import { getCards, getFilterOptions } from "@/lib/queries";
+import { NewArrivalsCarousel } from "@/components/new-arrivals-carousel";
+import { getCards, getFilterOptions, getNewArrivalCards } from "@/lib/queries";
 import type { CardFilters } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -35,9 +36,21 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     sort: getFilterValue(params.sort),
   };
 
-  const [{ rarities, sets, types }, paginatedCards] = await Promise.all([
+  const showNewArrivals =
+    currentPage === 1 &&
+    !filters.query &&
+    !filters.rarity &&
+    !filters.aa &&
+    !filters.type &&
+    !filters.set &&
+    !filters.minPrice &&
+    !filters.maxPrice &&
+    (!filters.sort || filters.sort === "");
+
+  const [{ rarities, sets, types }, paginatedCards, newArrivals] = await Promise.all([
     getFilterOptions(),
     getCards(filters, currentPage, CARDS_PER_PAGE),
+    showNewArrivals ? getNewArrivalCards(6) : Promise.resolve([]),
   ]);
   const { cards, totalCount, totalPages, page } = paginatedCards;
 
@@ -70,6 +83,19 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   return (
     <main className="space-y-5 pb-40 md:space-y-6 md:pb-12">
+      {showNewArrivals && newArrivals.length > 0 ? (
+        <section className="space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-500">Fresh drops</p>
+              <h2 className="font-heading text-[1.35rem] font-semibold tracking-tight text-white">New Arrivals</h2>
+              <p className="text-[13px] text-slate-400">Freshly added cards</p>
+            </div>
+          </div>
+          <NewArrivalsCarousel cards={newArrivals} />
+        </section>
+      ) : null}
+
       <section className="hidden space-y-3 md:block">
         <p className="text-xs font-bold uppercase tracking-[0.28em] text-white">Inventory</p>
         <h1 className="font-heading text-4xl font-semibold tracking-tight text-white">
@@ -88,7 +114,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         resultCount={totalCount}
       />
 
-      <section className="space-y-4">
+      <section className="space-y-4 pt-1">
         <div className="hidden items-center justify-between md:flex">
           <p className="text-sm text-slate-400">
             {totalCount} cards found

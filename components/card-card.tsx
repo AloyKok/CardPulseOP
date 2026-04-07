@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { FreshnessBadge } from "@/components/freshness-badge";
 import { formatRarityLabel } from "@/lib/rarities";
 import { StatusBadge } from "@/components/status-badge";
 import { formatCurrency } from "@/lib/utils";
@@ -37,6 +38,7 @@ export function CardCard({ card }: CardCardProps) {
             </h3>
             <p className="text-sm font-medium text-slate-400">{card.card_code}</p>
             <div className="flex min-h-[2.75rem] flex-wrap items-start gap-2 pt-1">
+              <FreshnessBadge listedAt={card.created_at} />
               <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
                 {card.card_type}
               </span>

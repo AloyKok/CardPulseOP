@@ -1,4 +1,5 @@
 import { CARD_TYPE_OPTIONS, normalizeCardType } from "@/lib/card-types";
+import { sortByLatestListed } from "@/lib/freshness";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { ALL_SET_OPTIONS, normalizeSetLabel } from "@/lib/sets";
 import type { Card, CardFilters } from "@/lib/types";
@@ -56,10 +57,11 @@ export async function getNewestCards(limit = 4): Promise<Card[]> {
     .from("cards")
     .select("*")
     .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(limit);
 
   ensureNoError(error, "newest card fetch");
-  return (data ?? []).map((row) => mapCard(row as Card));
+  return sortByLatestListed((data ?? []).map((row) => mapCard(row as Card)));
 }
 
 export async function getBrowsePreview(limit = 6): Promise<Card[]> {
@@ -69,10 +71,25 @@ export async function getBrowsePreview(limit = 6): Promise<Card[]> {
     .select("*")
     .order("is_available", { ascending: false })
     .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(limit);
 
   ensureNoError(error, "browse preview fetch");
   return (data ?? []).map((row) => mapCard(row as Card));
+}
+
+export async function getNewArrivalCards(limit = 8): Promise<Card[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("cards")
+    .select("*")
+    .gt("quantity", 0)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit);
+
+  ensureNoError(error, "new arrival fetch");
+  return sortByLatestListed((data ?? []).map((row) => mapCard(row as Card)));
 }
 
 export async function getInventoryCount() {
@@ -157,11 +174,8 @@ export async function getCards(
     case "price_desc":
       query = query.order("price_sgd", { ascending: false }).order("created_at", { ascending: false });
       break;
-    case "name_asc":
-      query = query.order("card_name", { ascending: true });
-      break;
     default:
-      query = query.order("created_at", { ascending: false });
+      query = query.order("created_at", { ascending: false }).order("id", { ascending: false });
       break;
   }
 
