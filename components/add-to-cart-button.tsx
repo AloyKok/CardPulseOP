@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { useCart } from "@/components/cart-provider";
+import { useToast } from "@/components/toast-provider";
 import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import type { CartCardInput } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export function AddToCartButton({
   analyticsSource = compact ? "browse_grid" : "product_detail",
 }: AddToCartButtonProps) {
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -80,6 +82,7 @@ export function AddToCartButton({
             metadata,
           });
           setAdded(true);
+          showToast(`${card.card_name} added to cart.`);
           window.setTimeout(() => setAdded(false), 1500);
         }}
         disabled={isDisabled}

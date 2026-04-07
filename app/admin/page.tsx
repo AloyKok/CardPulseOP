@@ -1,6 +1,7 @@
 import { deleteCardAction, upsertCardAction } from "@/app/admin/actions";
 import Link from "next/link";
 
+import { AdminToastBridge } from "@/components/admin-toast-bridge";
 import { AdminSelect } from "@/components/admin-select";
 import { CARD_TYPE_OPTIONS } from "@/lib/card-types";
 import { getAdminCardsByQuery } from "@/lib/queries";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 function CardFormFields({
   defaults,
+  redirectTo,
 }: {
   defaults?: {
     id?: number;
@@ -29,11 +31,13 @@ function CardFormFields({
     image_url?: string;
     is_featured?: number;
   };
+  redirectTo: string;
 }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {defaults?.id ? <input type="hidden" name="id" value={defaults.id} /> : null}
       <input type="hidden" name="current_image_url" value={defaults?.image_url ?? ""} />
+      <input type="hidden" name="redirect_to" value={redirectTo} />
 
       <div className="md:col-span-2">
         <label className="mb-2 block text-sm font-medium text-stone">Card Name</label>
@@ -154,9 +158,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
   const query = (getSearchValue(params.query) ?? "").trim();
   const cards = await getAdminCardsByQuery(query);
+  const redirectTo = query ? `/admin?query=${encodeURIComponent(query)}` : "/admin";
 
   return (
     <main className="space-y-8 pb-10">
+      <AdminToastBridge />
       <section className="space-y-3">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-3">
@@ -185,7 +191,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </p>
         </div>
         <form action={upsertCardAction} className="space-y-5">
-          <CardFormFields />
+          <CardFormFields redirectTo="/admin" />
           <button type="submit" className="btn-primary">
             Save card
           </button>
@@ -246,13 +252,14 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 />
                 <div className="space-y-5">
                   <form action={upsertCardAction} className="space-y-5">
-                    <CardFormFields defaults={card} />
+                    <CardFormFields defaults={card} redirectTo={redirectTo} />
                     <button type="submit" className="btn-primary">
                       Update card
                     </button>
                   </form>
                   <form action={deleteCardAction}>
                     <input type="hidden" name="id" value={card.id} />
+                    <input type="hidden" name="redirect_to" value={redirectTo} />
                     <button
                       type="submit"
                       className="rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { CARD_TYPE_OPTIONS, normalizeCardType } from "@/lib/card-types";
 import { RARITY_OPTIONS } from "@/lib/rarities";
@@ -46,6 +47,15 @@ async function saveUploadedFile(file: File) {
 function normalizeNumber(value: FormDataEntryValue | null, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function getAdminRedirectPath(formData: FormData, toastKey: string) {
+  const redirectTo = String(formData.get("redirect_to") || "/admin");
+  const [pathname, query = ""] = redirectTo.split("?");
+  const params = new URLSearchParams(query);
+  params.set("toast", toastKey);
+  const nextQuery = params.toString();
+  return nextQuery ? `${pathname}?${nextQuery}` : pathname;
 }
 
 export async function upsertCardAction(formData: FormData) {
@@ -117,6 +127,8 @@ export async function upsertCardAction(formData: FormData) {
   revalidatePath("/browse");
   revalidatePath("/admin");
   revalidatePath("/cart");
+
+  redirect(getAdminRedirectPath(formData, id ? "card-updated" : "card-added"));
 }
 
 export async function deleteCardAction(formData: FormData) {
@@ -133,4 +145,6 @@ export async function deleteCardAction(formData: FormData) {
   revalidatePath("/browse");
   revalidatePath("/admin");
   revalidatePath("/cart");
+
+  redirect(getAdminRedirectPath(formData, "card-deleted"));
 }
