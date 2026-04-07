@@ -4,10 +4,16 @@ import { cn } from "@/lib/utils";
 type FreshnessBadgeProps = {
   listedAt: string;
   className?: string;
+  simplifyTodayLabel?: boolean;
 };
 
-export function FreshnessBadge({ listedAt, className }: FreshnessBadgeProps) {
-  const label = getFreshnessLabel(listedAt);
+export function FreshnessBadge({
+  listedAt,
+  className,
+  simplifyTodayLabel = false,
+}: FreshnessBadgeProps) {
+  const rawLabel = getFreshnessLabel(listedAt);
+  const label = rawLabel === "New today" && simplifyTodayLabel ? "New" : rawLabel;
 
   if (!label) {
     return null;

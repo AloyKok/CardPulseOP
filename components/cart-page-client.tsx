@@ -4,11 +4,16 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { useCart } from "@/components/cart-provider";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
+import { getTelegramProfileLink, getTelegramUsernameDisplay } from "@/lib/telegram";
 import { formatCurrency } from "@/lib/utils";
 
 async function copyText(value: string) {
   await navigator.clipboard.writeText(value);
 }
+
+const TELEGRAM_USERNAME = getTelegramUsernameDisplay();
+const TELEGRAM_URL = getTelegramProfileLink();
 
 export function CartPageClient() {
   const { items, hydrated, itemCount, subtotal, copyText: cartText, updateQuantity, removeFromCart, clearCart } =
@@ -19,6 +24,18 @@ export function CartPageClient() {
     await copyText(cartText);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  const handleTelegramCheckout = () => {
+    trackAnalyticsEvent({
+      event_name: "telegram_checkout_clicked",
+      metadata: {
+        item_count: itemCount,
+        cart_size: items.length,
+        subtotal,
+      },
+    });
+    window.location.href = TELEGRAM_URL;
   };
 
   if (!hydrated) {
@@ -41,7 +58,7 @@ export function CartPageClient() {
           </h1>
           <p className="mt-3 max-w-xl text-stone">
             Add cards from the browse page or a card detail page, then copy the list and send it in
-            Telegram to @beppooo.
+            Telegram to {TELEGRAM_USERNAME}.
           </p>
           <Link href="/browse" className="btn-primary mt-6">
             Browse inventory
@@ -59,7 +76,7 @@ export function CartPageClient() {
           Review your claim list.
         </h1>
         <p className="max-w-2xl text-stone">
-          Adjust quantities, copy the cart text, then paste it into Telegram and send it to @beppooo.
+          Adjust quantities, copy the cart text, then paste it into Telegram and send it to {TELEGRAM_USERNAME}.
         </p>
       </section>
 
@@ -161,8 +178,11 @@ export function CartPageClient() {
               {copied ? "Copied" : "Copy cart items"}
             </button>
             <p className="text-center text-sm text-stone">
-              After copying, open Telegram and message <span className="font-semibold text-ink">@beppooo</span>.
+              After copying, open Telegram and message <span className="font-semibold text-ink">{TELEGRAM_USERNAME}</span>.
             </p>
+            <button type="button" onClick={handleTelegramCheckout} className="btn-secondary w-full justify-center">
+              Open Telegram
+            </button>
             <button
               type="button"
               onClick={clearCart}

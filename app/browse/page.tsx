@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AnalyticsEventOnView } from "@/components/analytics-event-on-view";
 import { BrowseListItem } from "@/components/browse-list-item";
 import { CardCard } from "@/components/card-card";
 import { FilterBar } from "@/components/filter-bar";
@@ -83,6 +84,21 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   return (
     <main className="space-y-5 pb-40 md:space-y-6 md:pb-12">
+      <AnalyticsEventOnView
+        eventName="browse_viewed"
+        searchTerm={filters.query ?? null}
+        metadata={{
+          page,
+          result_count: totalCount,
+          rarity: filters.rarity ?? null,
+          aa: filters.aa === "1",
+          type: filters.type ?? null,
+          set: filters.set ?? null,
+          min_price: filters.minPrice ?? null,
+          max_price: filters.maxPrice ?? null,
+          sort: filters.sort || "newest",
+        }}
+      />
       {showNewArrivals && newArrivals.length > 0 ? (
         <section className="space-y-3">
           <div className="flex items-end justify-between gap-4">

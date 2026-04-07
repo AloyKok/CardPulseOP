@@ -29,6 +29,15 @@ export function createClient(cookieStore: CookieStore) {
   });
 }
 
+export function createPublicClient() {
+  return createSupabaseClient(getSupabaseUrl(), getSupabasePublishableKey(), {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
 export function createAdminClient() {
   return createSupabaseClient(getSupabaseUrl(), getSupabaseServerKey(), {
     auth: {

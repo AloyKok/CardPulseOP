@@ -1,4 +1,6 @@
 import { deleteCardAction, upsertCardAction } from "@/app/admin/actions";
+import Link from "next/link";
+
 import { AdminSelect } from "@/components/admin-select";
 import { CARD_TYPE_OPTIONS } from "@/lib/card-types";
 import { getAdminCardsByQuery } from "@/lib/queries";
@@ -156,20 +158,30 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   return (
     <main className="space-y-8 pb-10">
       <section className="space-y-3">
-        <p className="text-xs font-bold uppercase tracking-[0.28em] text-white">Admin panel</p>
-        <h1 className="font-heading text-4xl font-semibold tracking-tight text-ink">
-          Manage CardPulse inventory.
-        </h1>
-        <p className="max-w-2xl text-stone">
-          Add cards, update price and stock, and cards with zero quantity will show as sold out automatically.
-        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-3">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-white">Admin panel</p>
+            <h1 className="font-heading text-4xl font-semibold tracking-tight text-white">
+              Manage CardPulse inventory.
+            </h1>
+            <p className="max-w-2xl text-slate-300">
+              Add cards, update price and stock, and cards with zero quantity will show as sold out automatically.
+            </p>
+          </div>
+          <Link
+            href="/admin/analytics"
+            className="inline-flex min-h-[48px] items-center justify-center whitespace-nowrap rounded-full border border-white/16 bg-white px-5 text-sm font-medium text-ink shadow-[0_12px_28px_rgba(0,0,0,0.24)] transition hover:bg-slate-100"
+          >
+            View analytics
+          </Link>
+        </div>
       </section>
 
       <section className="card-shell rounded-[2rem] p-6">
         <div className="mb-6">
           <h2 className="font-heading text-2xl font-semibold">Add a new card</h2>
           <p className="text-sm text-stone">
-            Provide an image URL or upload a file into the local app.
+            Upload the card image, then fill in the rest of the inventory details.
           </p>
         </div>
         <form action={upsertCardAction} className="space-y-5">

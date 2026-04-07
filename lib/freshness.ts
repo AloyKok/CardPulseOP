@@ -1,5 +1,5 @@
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const THREE_DAYS_MS = 72 * 60 * 60 * 1000;
+const TWO_DAYS_MS = 48 * 60 * 60 * 1000;
 
 export type FreshnessLabel = "New today" | "New" | null;
 
@@ -29,7 +29,7 @@ export function getFreshnessLabel(value: string | null | undefined, now = Date.n
     return "New today";
   }
 
-  if (ageMs <= THREE_DAYS_MS) {
+  if (ageMs <= TWO_DAYS_MS) {
     return "New";
   }
 

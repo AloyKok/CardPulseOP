@@ -1,8 +1,9 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import type { CardFilters } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -82,6 +83,7 @@ export function FilterBar({ filters, rarities, types, sets, resultCount }: Filte
   const [draftSet, setDraftSet] = useState(filters.set ?? "");
   const [draftMinPrice, setDraftMinPrice] = useState(filters.minPrice ?? "");
   const [draftMaxPrice, setDraftMaxPrice] = useState(filters.maxPrice ?? "");
+  const previousFiltersRef = useRef<CardFilters | null>(null);
 
   useEffect(() => {
     setQuery(filters.query ?? "");
@@ -92,6 +94,74 @@ export function FilterBar({ filters, rarities, types, sets, resultCount }: Filte
     setDraftMinPrice(filters.minPrice ?? "");
     setDraftMaxPrice(filters.maxPrice ?? "");
   }, [filters]);
+
+  useEffect(() => {
+    const previousFilters = previousFiltersRef.current;
+
+    if (!previousFilters) {
+      previousFiltersRef.current = filters;
+      return;
+    }
+
+    const previousQuery = (previousFilters.query ?? "").trim();
+    const currentQuery = (filters.query ?? "").trim();
+
+    if (currentQuery && currentQuery !== previousQuery) {
+      trackAnalyticsEvent({
+        event_name: "search_performed",
+        search_term: currentQuery,
+        metadata: {
+          result_count: resultCount,
+        },
+      });
+    }
+
+    const previousSort = previousFilters.sort ?? "";
+    const currentSort = filters.sort ?? "";
+
+    if (currentSort !== previousSort) {
+      trackAnalyticsEvent({
+        event_name: "sort_changed",
+        metadata: {
+          sort: currentSort || "newest",
+        },
+      });
+    }
+
+    const previousFilterSnapshot = JSON.stringify({
+      rarity: previousFilters.rarity ?? "",
+      aa: previousFilters.aa ?? "",
+      type: previousFilters.type ?? "",
+      set: previousFilters.set ?? "",
+      minPrice: previousFilters.minPrice ?? "",
+      maxPrice: previousFilters.maxPrice ?? "",
+    });
+    const currentFilterSnapshot = JSON.stringify({
+      rarity: filters.rarity ?? "",
+      aa: filters.aa ?? "",
+      type: filters.type ?? "",
+      set: filters.set ?? "",
+      minPrice: filters.minPrice ?? "",
+      maxPrice: filters.maxPrice ?? "",
+    });
+
+    if (currentFilterSnapshot !== previousFilterSnapshot) {
+      trackAnalyticsEvent({
+        event_name: "filter_applied",
+        metadata: {
+          rarity: filters.rarity ?? null,
+          aa: filters.aa === "1",
+          type: filters.type ?? null,
+          set: filters.set ?? null,
+          min_price: filters.minPrice ?? null,
+          max_price: filters.maxPrice ?? null,
+          result_count: resultCount,
+        },
+      });
+    }
+
+    previousFiltersRef.current = filters;
+  }, [filters, resultCount]);
 
   const activeFilterCount = [
     filters.rarity,

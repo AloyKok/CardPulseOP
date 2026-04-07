@@ -11,6 +11,12 @@ function unauthorizedResponse() {
   });
 }
 
+function configurationErrorResponse() {
+  return new NextResponse("Admin credentials are not configured.", {
+    status: 500,
+  });
+}
+
 export async function middleware(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/admin")) {
     return updateSession(request);
@@ -31,8 +37,12 @@ export async function middleware(request: NextRequest) {
   }
 
   const [username, password] = decoded.split(":");
-  const expectedUsername = process.env.ADMIN_USERNAME || "admin";
-  const expectedPassword = process.env.ADMIN_PASSWORD || "cardpulse";
+  const expectedUsername = process.env.ADMIN_USERNAME;
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+
+  if (!expectedUsername || !expectedPassword) {
+    return configurationErrorResponse();
+  }
 
   if (username !== expectedUsername || password !== expectedPassword) {
     return unauthorizedResponse();

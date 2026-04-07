@@ -3,7 +3,7 @@ import { sortByLatestListed } from "@/lib/freshness";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { ALL_SET_OPTIONS, normalizeSetLabel } from "@/lib/sets";
 import type { Card, CardFilters } from "@/lib/types";
-import { createAdminClient } from "@/utils/supabase/server";
+import { createAdminClient, createPublicClient } from "@/utils/supabase/server";
 
 export type PaginatedCardsResult = {
   cards: Card[];
@@ -39,7 +39,7 @@ function sanitizeQueryTerm(value: string) {
 }
 
 export async function getFeaturedCards(limit = 4): Promise<Card[]> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("cards")
     .select("*")
@@ -52,7 +52,7 @@ export async function getFeaturedCards(limit = 4): Promise<Card[]> {
 }
 
 export async function getNewestCards(limit = 4): Promise<Card[]> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("cards")
     .select("*")
@@ -65,7 +65,7 @@ export async function getNewestCards(limit = 4): Promise<Card[]> {
 }
 
 export async function getBrowsePreview(limit = 6): Promise<Card[]> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("cards")
     .select("*")
@@ -79,7 +79,7 @@ export async function getBrowsePreview(limit = 6): Promise<Card[]> {
 }
 
 export async function getNewArrivalCards(limit = 8): Promise<Card[]> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("cards")
     .select("*")
@@ -93,7 +93,7 @@ export async function getNewArrivalCards(limit = 8): Promise<Card[]> {
 }
 
 export async function getInventoryCount() {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { count, error } = await supabase.from("cards").select("id", { count: "exact", head: true });
 
   ensureNoError(error, "inventory count");
@@ -101,7 +101,7 @@ export async function getInventoryCount() {
 }
 
 export async function getFilterOptions() {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase.from("cards").select("set_code, card_type");
 
   ensureNoError(error, "filter option fetch");
@@ -119,7 +119,7 @@ export async function getCards(
   page = 1,
   perPage = 20,
 ): Promise<PaginatedCardsResult> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const safePage = Math.max(1, page);
   const safePerPage = Math.max(1, perPage);
   const from = (safePage - 1) * safePerPage;
@@ -195,11 +195,37 @@ export async function getCards(
 }
 
 export async function getCardById(id: number): Promise<Card | null> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase.from("cards").select("*").eq("id", id).maybeSingle();
 
   ensureNoError(error, "card fetch by id");
   return data ? mapCard(data as Card) : null;
+}
+
+export async function getRelatedCardsBySet(
+  setCode: string | null | undefined,
+  currentCardId: number,
+  limit = 6,
+): Promise<Card[]> {
+  const normalizedSetCode = normalizeSetLabel(String(setCode ?? ""));
+
+  if (!normalizedSetCode) {
+    return [];
+  }
+
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("cards")
+    .select("*")
+    .eq("set_code", normalizedSetCode)
+    .neq("id", currentCardId)
+    .order("is_available", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit);
+
+  ensureNoError(error, "related card fetch");
+  return sortByLatestListed((data ?? []).map((row) => mapCard(row as Card))).slice(0, limit);
 }
 
 export async function getAdminCards(): Promise<Card[]> {

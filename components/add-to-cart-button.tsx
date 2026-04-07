@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { useCart } from "@/components/cart-provider";
+import { trackAnalyticsEvent } from "@/lib/analytics-client";
 import type { CartCardInput } from "@/lib/types";
 
 type AddToCartButtonProps = {
@@ -10,6 +11,7 @@ type AddToCartButtonProps = {
   className?: string;
   label?: string;
   compact?: boolean;
+  analyticsSource?: string;
 };
 
 export function AddToCartButton({
@@ -17,6 +19,7 @@ export function AddToCartButton({
   className,
   label = "CLAIM",
   compact = false,
+  analyticsSource = compact ? "browse_grid" : "product_detail",
 }: AddToCartButtonProps) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
@@ -61,6 +64,21 @@ export function AddToCartButton({
         type="button"
         onClick={() => {
           addToCart(card, quantity);
+          const metadata = {
+            quantity,
+            source: analyticsSource,
+            unit_price: card.price_sgd,
+          };
+          trackAnalyticsEvent({
+            event_name: "add_to_cart",
+            card_id: card.id,
+            metadata,
+          });
+          trackAnalyticsEvent({
+            event_name: "claim_clicked",
+            card_id: card.id,
+            metadata,
+          });
           setAdded(true);
           window.setTimeout(() => setAdded(false), 1500);
         }}

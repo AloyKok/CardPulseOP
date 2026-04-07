@@ -27,7 +27,10 @@ export function BrowseListItem({ card }: BrowseListItemProps) {
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
-              <StatusBadge available={canClaim} />
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge available={canClaim} />
+                <FreshnessBadge listedAt={card.created_at} simplifyTodayLabel />
+              </div>
               <div className="text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Price</p>
                 <p className="mt-1 text-[1.35rem] font-semibold leading-none text-ink">
@@ -42,7 +45,6 @@ export function BrowseListItem({ card }: BrowseListItemProps) {
             <p className="mt-1 text-sm font-medium text-slate-400">{card.card_code}</p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <FreshnessBadge listedAt={card.created_at} />
               <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
                 {card.card_type}
               </span>

@@ -30,24 +30,27 @@ NEXT_PUBLIC_TELEGRAM_USERNAME=yourtelegramhandle
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is strongly recommended for admin writes because the bundled SQL enables public read access only.
+`SUPABASE_SERVICE_ROLE_KEY` is required for admin writes, image uploads, and analytics event storage.
 
 3. In Supabase, open the SQL Editor and run [supabase/schema.sql](/Users/aloykok/Documents/CardPulse | Mini App/supabase/schema.sql).
+4. If your database was already set up before analytics was added, also run [supabase/migrations/20260407_add_analytics_events.sql](/Users/aloykok/Documents/CardPulse | Mini App/supabase/migrations/20260407_add_analytics_events.sql).
 
-4. Start the app:
+5. Start the app:
 
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000)
+6. Open [http://localhost:3000](http://localhost:3000)
 
-6. Visit `/admin` and sign in with the basic auth credentials above.
+7. Visit `/admin` and sign in with the basic auth credentials above.
 
 ## Database
 
 - Hosted DB: Supabase Postgres
 - Schema + sample seed data: [supabase/schema.sql](/Users/aloykok/Documents/CardPulse | Mini App/supabase/schema.sql)
-- The app expects a `public.cards` table with the fields already defined in that SQL file.
+- Analytics migration: [supabase/migrations/20260407_add_analytics_events.sql](/Users/aloykok/Documents/CardPulse | Mini App/supabase/migrations/20260407_add_analytics_events.sql)
+- The app expects both `public.cards` and `public.analytics_events` to exist.
 
 ## Core structure
 
@@ -101,4 +104,5 @@ utils/
 ## Notes
 
 - Users build a cart, copy the cart text, and send it in Telegram manually.
-- Admin image uploads still save into `public/uploads/`. For production hosting, use stable image URLs or move uploads to Supabase Storage next.
+- Admin image uploads use Supabase Storage in the `card-images` bucket.
+- `/admin/analytics` shows the lightweight internal analytics dashboard once the analytics migration has been run.

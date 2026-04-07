@@ -28,7 +28,10 @@ export function CardCard({ card }: CardCardProps) {
             <span className="rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-700 backdrop-blur-sm">
               {rarityLabel}
             </span>
-            <StatusBadge available={canClaim} />
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <FreshnessBadge listedAt={card.created_at} simplifyTodayLabel />
+              <StatusBadge available={canClaim} />
+            </div>
           </div>
         </div>
         <div className="space-y-3 p-4">
@@ -38,7 +41,6 @@ export function CardCard({ card }: CardCardProps) {
             </h3>
             <p className="text-sm font-medium text-slate-400">{card.card_code}</p>
             <div className="flex min-h-[2.75rem] flex-wrap items-start gap-2 pt-1">
-              <FreshnessBadge listedAt={card.created_at} />
               <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
                 {card.card_type}
               </span>
@@ -71,6 +73,7 @@ export function CardCard({ card }: CardCardProps) {
             available_quantity: canClaim ? card.quantity : 0,
           }}
           compact
+          analyticsSource="browse_grid"
           className="btn-primary min-w-0 justify-center"
         />
         <Link

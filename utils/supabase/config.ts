@@ -17,5 +17,5 @@ export function getSupabasePublishableKey() {
 }
 
 export function getSupabaseServerKey() {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY || getSupabasePublishableKey();
+  return getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
 }

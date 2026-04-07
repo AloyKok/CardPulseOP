@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { AnalyticsEventOnView } from "@/components/analytics-event-on-view";
 import { FreshnessBadge } from "@/components/freshness-badge";
+import { RelatedCard } from "@/components/related-card";
 import { getFreshnessContext } from "@/lib/freshness";
 import { formatRarityLabel } from "@/lib/rarities";
 import { StatusBadge } from "@/components/status-badge";
-import { getCardById } from "@/lib/queries";
+import { getCardById, getRelatedCardsBySet } from "@/lib/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +28,16 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
   const canClaim = card.quantity > 0;
   const rarityLabel = formatRarityLabel(card.rarity, card.is_alt_art);
   const freshnessContext = getFreshnessContext(card.created_at);
+  const relatedCards = await getRelatedCardsBySet(card.set_code, card.id, 6);
+  const showRelatedCards = relatedCards.length >= 2;
 
   return (
-    <main className="pb-10">
+    <main className="space-y-7 pb-10 md:space-y-8">
+      <AnalyticsEventOnView
+        eventName="product_viewed"
+        cardId={card.id}
+        metadata={{ set_code: card.set_code, card_code: card.card_code }}
+      />
       <div className="mb-6">
         <Link href="/browse" className="text-sm font-medium text-white hover:text-slate-300">
           ← Back to browse
@@ -79,6 +88,7 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
                   image_url: card.image_url,
                   available_quantity: canClaim ? card.quantity : 0,
                 }}
+                analyticsSource="product_detail"
                 className={`btn-primary w-full justify-center text-center sm:min-w-[180px] ${
                   canClaim ? "" : "cursor-not-allowed opacity-40"
                 }`}
@@ -121,6 +131,23 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
           </dl>
         </div>
       </section>
+      {showRelatedCards ? (
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="font-heading text-[1.55rem] font-semibold tracking-tight text-white">
+              More from this set
+            </h2>
+            <p className="text-sm text-slate-400">Explore other cards from this release.</p>
+          </div>
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0 lg:grid-cols-4">
+            {relatedCards.map((relatedCard) => (
+              <div key={relatedCard.id} className="w-[170px] flex-none md:w-auto">
+                <RelatedCard card={relatedCard} currentCardId={card.id} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
