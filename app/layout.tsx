@@ -21,8 +21,49 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "CardPulse",
-  description: "Telegram Mini App storefront for trading cards.",
+  metadataBase: new URL("https://cardpulse.net"),
+  title: {
+    default: "CardPulse | One Piece TCG Storefront",
+    template: "%s | CardPulse",
+  },
+  description:
+    "Browse One Piece TCG singles, track new arrivals, build your cart, and claim cards through Telegram with CardPulse.",
+  applicationName: "CardPulse",
+  keywords: [
+    "CardPulse",
+    "One Piece TCG",
+    "trading cards",
+    "Telegram Mini App",
+    "card storefront",
+    "TCG singles",
+    "One Piece cards Singapore",
+  ],
+  alternates: {
+    canonical: "/browse",
+  },
+  openGraph: {
+    title: "CardPulse | One Piece TCG Storefront",
+    description:
+      "Browse One Piece TCG singles, explore new arrivals, and claim cards through Telegram.",
+    url: "https://cardpulse.net/browse",
+    siteName: "CardPulse",
+    type: "website",
+    images: [
+      {
+        url: "/brand/cardpulse-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "CardPulse",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CardPulse | One Piece TCG Storefront",
+    description:
+      "Browse One Piece TCG singles, explore new arrivals, and claim cards through Telegram.",
+    images: ["/brand/cardpulse-logo.png"],
+  },
 };
 
 export default function RootLayout({
