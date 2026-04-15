@@ -3,7 +3,7 @@ import { sortByLatestListed } from "@/lib/freshness";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { ALL_SET_OPTIONS, normalizeSetLabel } from "@/lib/sets";
 import type { Card, CardFilters } from "@/lib/types";
-import { createAdminClient, createPublicClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/server";
 
 export type PaginatedCardsResult = {
   cards: Card[];
@@ -25,6 +25,7 @@ function mapCard(row: Card): Card {
     quantity,
     is_available: quantity > 0 ? 1 : 0,
     is_featured: Number(row.is_featured),
+    updated_at: String(row.updated_at ?? row.created_at),
   };
 }
 
@@ -229,7 +230,7 @@ export async function getRelatedCardsBySet(
 }
 
 export async function getAdminCards(): Promise<Card[]> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase.from("cards").select("*").order("created_at", { ascending: false });
 
   ensureNoError(error, "admin card fetch");
@@ -237,7 +238,7 @@ export async function getAdminCards(): Promise<Card[]> {
 }
 
 export async function getAdminCardsByQuery(queryTerm = ""): Promise<Card[]> {
-  const supabase = createAdminClient();
+  const supabase = createPublicClient();
   const term = sanitizeQueryTerm(queryTerm);
 
   let query = supabase.from("cards").select("*");

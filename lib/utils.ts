@@ -16,6 +16,17 @@ export function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+export function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-SG", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(value));
+}
+
 export function toBoolean(value: FormDataEntryValue | null) {
   return value === "on" || value === "true" || value === "1";
 }

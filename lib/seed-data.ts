@@ -20,6 +20,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 1,
     created_at: "2025-02-01T09:00:00.000Z",
+    updated_at: "2025-02-01T09:00:00.000Z",
   },
   {
     card_name: "Roronoa Zoro",
@@ -37,6 +38,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 1,
     created_at: "2025-02-10T09:00:00.000Z",
+    updated_at: "2025-02-10T09:00:00.000Z",
   },
   {
     card_name: "Portgas D. Ace",
@@ -54,6 +56,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 0,
     created_at: "2025-02-12T09:00:00.000Z",
+    updated_at: "2025-02-12T09:00:00.000Z",
   },
   {
     card_name: "Trafalgar Law",
@@ -71,6 +74,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 1,
     created_at: "2025-02-13T09:00:00.000Z",
+    updated_at: "2025-02-13T09:00:00.000Z",
   },
   {
     card_name: "Shanks",
@@ -88,6 +92,7 @@ export const seedCards: SeedCard[] = [
     is_available: 0,
     is_featured: 0,
     created_at: "2025-02-14T09:00:00.000Z",
+    updated_at: "2025-02-14T09:00:00.000Z",
   },
   {
     card_name: "Yamato",
@@ -105,6 +110,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 0,
     created_at: "2025-02-15T09:00:00.000Z",
+    updated_at: "2025-02-15T09:00:00.000Z",
   },
   {
     card_name: "Boa Hancock",
@@ -122,6 +128,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 1,
     created_at: "2025-02-16T09:00:00.000Z",
+    updated_at: "2025-02-16T09:00:00.000Z",
   },
   {
     card_name: "Sabo",
@@ -139,6 +146,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 0,
     created_at: "2025-02-17T09:00:00.000Z",
+    updated_at: "2025-02-17T09:00:00.000Z",
   },
   {
     card_name: "Eustass Kid",
@@ -156,6 +164,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 0,
     created_at: "2025-02-18T09:00:00.000Z",
+    updated_at: "2025-02-18T09:00:00.000Z",
   },
   {
     card_name: "Nami",
@@ -173,6 +182,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 1,
     created_at: "2025-02-19T09:00:00.000Z",
+    updated_at: "2025-02-19T09:00:00.000Z",
   },
   {
     card_name: "Silvers Rayleigh",
@@ -190,6 +200,7 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 0,
     created_at: "2025-02-20T09:00:00.000Z",
+    updated_at: "2025-02-20T09:00:00.000Z",
   },
   {
     card_name: "Tony Tony Chopper",
@@ -207,5 +218,6 @@ export const seedCards: SeedCard[] = [
     is_available: 1,
     is_featured: 0,
     created_at: "2025-02-21T09:00:00.000Z",
+    updated_at: "2025-02-21T09:00:00.000Z",
   },
 ];

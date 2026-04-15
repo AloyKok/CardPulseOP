@@ -14,11 +14,19 @@ create table if not exists public.cards (
   image_url text not null,
   is_available integer not null default 1,
   is_featured integer not null default 0,
-  created_at timestamptz not null default timezone('utc', now())
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
 );
 
 alter table public.cards
   add column if not exists card_type text not null default 'Character';
+
+alter table public.cards
+  add column if not exists updated_at timestamptz not null default timezone('utc', now());
+
+update public.cards
+set updated_at = coalesce(updated_at, created_at, timezone('utc', now()))
+where updated_at is null;
 
 update public.cards
 set card_type = 'Character'
@@ -38,6 +46,7 @@ begin
 end $$;
 
 create index if not exists cards_created_at_idx on public.cards (created_at desc);
+create index if not exists cards_updated_at_idx on public.cards (updated_at desc);
 create index if not exists cards_availability_idx on public.cards (is_available desc, created_at desc);
 create index if not exists cards_featured_idx on public.cards (is_featured desc, created_at desc);
 create index if not exists cards_lookup_idx on public.cards (set_code, card_type, rarity, price_sgd);
@@ -66,21 +75,22 @@ insert into public.cards (
   image_url,
   is_available,
   is_featured,
-  created_at
+  created_at,
+  updated_at
 )
 values
-  ('Monkey D. Luffy', 'OP05-060', '[OP-05] Awakening of the New Era', 'Character', 'SEC', 0, 'Monkey D. Luffy', 'English', 'Near Mint', 258, 1, 'https://images.unsplash.com/photo-1618336753974-aae8e04506aa?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-01T09:00:00.000Z'),
-  ('Roronoa Zoro', 'OP06-118', '[OP-06] Wings of the Captain', 'Character', 'SR', 0, 'Roronoa Zoro', 'Japanese', 'Mint', 72, 2, 'https://images.unsplash.com/photo-1614632537190-23e4146777db?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-10T09:00:00.000Z'),
-  ('Portgas D. Ace', 'OP03-013', '[OP-03] Pillars of Strength', 'Character', 'SR', 0, 'Portgas D. Ace', 'English', 'Near Mint', 48, 3, 'https://images.unsplash.com/photo-1627855436411-71cb3d2fcd02?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-12T09:00:00.000Z'),
-  ('Trafalgar Law', 'OP01-047', '[OP-01] Romance Dawn', 'Character', 'SEC', 0, 'Trafalgar Law', 'English', 'Lightly Played', 114, 1, 'https://images.unsplash.com/photo-1627856013091-fed6e8fd8c76?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-13T09:00:00.000Z'),
-  ('Shanks', 'OP01-120', '[OP-01] Romance Dawn', 'Character', 'SEC', 0, 'Shanks', 'Japanese', 'Near Mint', 190, 0, 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80', 0, 0, '2025-02-14T09:00:00.000Z'),
-  ('Yamato', 'OP04-112', '[OP-04] Kingdoms of Intrigue', 'Character', 'SR', 0, 'Yamato', 'English', 'Mint', 58, 4, 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-15T09:00:00.000Z'),
-  ('Boa Hancock', 'OP07-051', '[OP-07] 500 Years in the Future', 'Character', 'SP', 1, 'Boa Hancock', 'English', 'Near Mint', 139, 1, 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-16T09:00:00.000Z'),
-  ('Sabo', 'OP04-083', '[OP-04] Kingdoms of Intrigue', 'Character', 'SEC', 0, 'Sabo', 'Japanese', 'Near Mint', 88, 2, 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-17T09:00:00.000Z'),
-  ('Eustass Kid', 'OP05-074', '[OP-05] Awakening of the New Era', 'Character', 'R', 0, 'Eustass Kid', 'English', 'Near Mint', 18, 5, 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-18T09:00:00.000Z'),
-  ('Nami', 'OP08-106', '[OP-08] Two Legends', 'Character', 'SP', 0, 'Nami', 'English', 'Mint', 208, 1, 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-19T09:00:00.000Z'),
-  ('Silvers Rayleigh', 'OP08-118', '[OP-08] Two Legends', 'Character', 'SR', 0, 'Silvers Rayleigh', 'Japanese', 'Near Mint', 66, 2, 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-20T09:00:00.000Z'),
-  ('Tony Tony Chopper', 'OP06-035', '[OP-06] Wings of the Captain', 'Character', 'U', 0, 'Tony Tony Chopper', 'English', 'Near Mint', 12, 7, 'https://images.unsplash.com/photo-1546443046-ed1ce6ffd1ab?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-21T09:00:00.000Z')
+  ('Monkey D. Luffy', 'OP05-060', '[OP-05] Awakening of the New Era', 'Character', 'SEC', 0, 'Monkey D. Luffy', 'English', 'Near Mint', 258, 1, 'https://images.unsplash.com/photo-1618336753974-aae8e04506aa?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-01T09:00:00.000Z', '2025-02-01T09:00:00.000Z'),
+  ('Roronoa Zoro', 'OP06-118', '[OP-06] Wings of the Captain', 'Character', 'SR', 0, 'Roronoa Zoro', 'Japanese', 'Mint', 72, 2, 'https://images.unsplash.com/photo-1614632537190-23e4146777db?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-10T09:00:00.000Z', '2025-02-10T09:00:00.000Z'),
+  ('Portgas D. Ace', 'OP03-013', '[OP-03] Pillars of Strength', 'Character', 'SR', 0, 'Portgas D. Ace', 'English', 'Near Mint', 48, 3, 'https://images.unsplash.com/photo-1627855436411-71cb3d2fcd02?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-12T09:00:00.000Z', '2025-02-12T09:00:00.000Z'),
+  ('Trafalgar Law', 'OP01-047', '[OP-01] Romance Dawn', 'Character', 'SEC', 0, 'Trafalgar Law', 'English', 'Lightly Played', 114, 1, 'https://images.unsplash.com/photo-1627856013091-fed6e8fd8c76?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-13T09:00:00.000Z', '2025-02-13T09:00:00.000Z'),
+  ('Shanks', 'OP01-120', '[OP-01] Romance Dawn', 'Character', 'SEC', 0, 'Shanks', 'Japanese', 'Near Mint', 190, 0, 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80', 0, 0, '2025-02-14T09:00:00.000Z', '2025-02-14T09:00:00.000Z'),
+  ('Yamato', 'OP04-112', '[OP-04] Kingdoms of Intrigue', 'Character', 'SR', 0, 'Yamato', 'English', 'Mint', 58, 4, 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-15T09:00:00.000Z', '2025-02-15T09:00:00.000Z'),
+  ('Boa Hancock', 'OP07-051', '[OP-07] 500 Years in the Future', 'Character', 'SP', 1, 'Boa Hancock', 'English', 'Near Mint', 139, 1, 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-16T09:00:00.000Z', '2025-02-16T09:00:00.000Z'),
+  ('Sabo', 'OP04-083', '[OP-04] Kingdoms of Intrigue', 'Character', 'SEC', 0, 'Sabo', 'Japanese', 'Near Mint', 88, 2, 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-17T09:00:00.000Z', '2025-02-17T09:00:00.000Z'),
+  ('Eustass Kid', 'OP05-074', '[OP-05] Awakening of the New Era', 'Character', 'R', 0, 'Eustass Kid', 'English', 'Near Mint', 18, 5, 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-18T09:00:00.000Z', '2025-02-18T09:00:00.000Z'),
+  ('Nami', 'OP08-106', '[OP-08] Two Legends', 'Character', 'SP', 0, 'Nami', 'English', 'Mint', 208, 1, 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=900&q=80', 1, 1, '2025-02-19T09:00:00.000Z', '2025-02-19T09:00:00.000Z'),
+  ('Silvers Rayleigh', 'OP08-118', '[OP-08] Two Legends', 'Character', 'SR', 0, 'Silvers Rayleigh', 'Japanese', 'Near Mint', 66, 2, 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-20T09:00:00.000Z', '2025-02-20T09:00:00.000Z'),
+  ('Tony Tony Chopper', 'OP06-035', '[OP-06] Wings of the Captain', 'Character', 'U', 0, 'Tony Tony Chopper', 'English', 'Near Mint', 12, 7, 'https://images.unsplash.com/photo-1546443046-ed1ce6ffd1ab?auto=format&fit=crop&w=900&q=80', 1, 0, '2025-02-21T09:00:00.000Z', '2025-02-21T09:00:00.000Z')
 on conflict do nothing;
 
 create table if not exists public.analytics_events (

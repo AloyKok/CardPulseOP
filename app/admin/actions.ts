@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { executeAdminCommand } from "@/lib/admin-commands";
 import { CARD_TYPE_OPTIONS, normalizeCardType } from "@/lib/card-types";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { normalizeSetLabel } from "@/lib/sets";
@@ -101,6 +102,7 @@ export async function upsertCardAction(formData: FormData) {
     image_url: imageUrl,
     is_available: isAvailable,
     is_featured: isFeatured,
+    updated_at: new Date().toISOString(),
   };
 
   if (id) {
@@ -129,6 +131,32 @@ export async function upsertCardAction(formData: FormData) {
   revalidatePath("/cart");
 
   redirect(getAdminRedirectPath(formData, id ? "card-updated" : "card-added"));
+}
+
+export type AdminCommandActionState = {
+  nonce: number;
+  command: string;
+  ok: boolean;
+  lines: string[];
+};
+
+export async function executeAdminCommandAction(
+  _previousState: AdminCommandActionState,
+  formData: FormData,
+): Promise<AdminCommandActionState> {
+  const command = String(formData.get("command") || "").trim();
+  const result = await executeAdminCommand(command);
+
+  revalidatePath("/admin");
+  revalidatePath("/browse");
+  revalidatePath("/cards/[id]");
+
+  return {
+    nonce: Date.now(),
+    command,
+    ok: result.ok,
+    lines: result.lines,
+  };
 }
 
 export async function deleteCardAction(formData: FormData) {

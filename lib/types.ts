@@ -15,6 +15,7 @@ export type Card = {
   is_available: number;
   is_featured: number;
   created_at: string;
+  updated_at: string;
 };
 
 export type CardFilters = {

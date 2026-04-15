@@ -1,13 +1,14 @@
 import { deleteCardAction, upsertCardAction } from "@/app/admin/actions";
 import Link from "next/link";
 
+import { AdminCommandConsole } from "@/components/admin-command-console";
 import { AdminToastBridge } from "@/components/admin-toast-bridge";
 import { AdminSelect } from "@/components/admin-select";
 import { CARD_TYPE_OPTIONS } from "@/lib/card-types";
 import { getAdminCardsByQuery } from "@/lib/queries";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { SET_GROUPS, normalizeSetLabel } from "@/lib/sets";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -198,6 +199,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         </form>
       </section>
 
+      <AdminCommandConsole />
+
       <section className="space-y-4">
         <div className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -241,7 +244,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 </div>
                 <div className="text-right text-sm text-stone">
                   <p>{card.quantity > 0 ? "Available" : "Sold Out"}</p>
-                  <p>Added {formatDate(card.created_at)}</p>
+                  <p>Updated {formatDate(card.updated_at)}</p>
                 </div>
               </summary>
               <div className="grid gap-5 border-t border-slate-200 p-5 lg:grid-cols-[220px_1fr]">
@@ -253,6 +256,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <div className="space-y-5">
                   <form action={upsertCardAction} className="space-y-5">
                     <CardFormFields defaults={card} redirectTo={redirectTo} />
+                    <p className="text-sm text-stone">
+                      Last updated {formatDateTime(card.updated_at)}
+                    </p>
                     <button type="submit" className="btn-primary">
                       Update card
                     </button>
