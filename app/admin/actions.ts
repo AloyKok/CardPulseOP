@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { executeAdminCommand } from "@/lib/admin-commands";
 import { CARD_TYPE_OPTIONS, normalizeCardType } from "@/lib/card-types";
 import { RARITY_OPTIONS } from "@/lib/rarities";
 import { normalizeSetLabel } from "@/lib/sets";
+import type { Card } from "@/lib/types";
 import { toBoolean } from "@/lib/utils";
 import { createAdminClient } from "@/utils/supabase/server";
 
@@ -50,16 +50,27 @@ function normalizeNumber(value: FormDataEntryValue | null, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function getAdminRedirectPath(formData: FormData, toastKey: string) {
-  const redirectTo = String(formData.get("redirect_to") || "/admin");
-  const [pathname, query = ""] = redirectTo.split("?");
-  const params = new URLSearchParams(query);
-  params.set("toast", toastKey);
-  const nextQuery = params.toString();
-  return nextQuery ? `${pathname}?${nextQuery}` : pathname;
+function mapCard(row: Card): Card {
+  const quantity = Number(row.quantity);
+
+  return {
+    ...row,
+    id: Number(row.id),
+    is_alt_art: Number(row.is_alt_art),
+    price_sgd: Number(row.price_sgd),
+    quantity,
+    is_available: quantity > 0 ? 1 : 0,
+    is_featured: Number(row.is_featured),
+    updated_at: String(row.updated_at ?? row.created_at),
+  };
 }
 
-export async function upsertCardAction(formData: FormData) {
+export type UpsertCardActionResult = {
+  card: Card;
+  mode: "created" | "updated";
+};
+
+export async function upsertCardAction(formData: FormData): Promise<UpsertCardActionResult> {
   const supabase = createAdminClient();
   const id = formData.get("id");
   const upload = formData.get("image_file");
@@ -106,31 +117,46 @@ export async function upsertCardAction(formData: FormData) {
   };
 
   if (id) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("cards")
       .update(payload)
-      .eq("id", Number(id));
+      .eq("id", Number(id))
+      .select("*")
+      .single();
 
     if (error) {
       throw new Error(`Supabase card update failed: ${error.message}`);
     }
+
+    revalidatePath("/");
+    revalidatePath("/browse");
+    revalidatePath("/admin");
+    revalidatePath("/cart");
+
+    return { card: mapCard(data as Card), mode: "updated" };
   } else {
-    const { error } = await supabase.from("cards").insert({
-      ...payload,
-      created_at: new Date().toISOString(),
-    });
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("cards")
+      .insert({
+        ...payload,
+        created_at: now,
+        updated_at: now,
+      })
+      .select("*")
+      .single();
 
     if (error) {
       throw new Error(`Supabase card insert failed: ${error.message}`);
     }
+
+    revalidatePath("/");
+    revalidatePath("/browse");
+    revalidatePath("/admin");
+    revalidatePath("/cart");
+
+    return { card: mapCard(data as Card), mode: "created" };
   }
-
-  revalidatePath("/");
-  revalidatePath("/browse");
-  revalidatePath("/admin");
-  revalidatePath("/cart");
-
-  redirect(getAdminRedirectPath(formData, id ? "card-updated" : "card-added"));
 }
 
 export type AdminCommandActionState = {
@@ -159,7 +185,7 @@ export async function executeAdminCommandAction(
   };
 }
 
-export async function deleteCardAction(formData: FormData) {
+export async function deleteCardAction(formData: FormData): Promise<{ id: number }> {
   const supabase = createAdminClient();
   const id = Number(formData.get("id"));
 
@@ -174,5 +200,5 @@ export async function deleteCardAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/cart");
 
-  redirect(getAdminRedirectPath(formData, "card-deleted"));
+  return { id };
 }
