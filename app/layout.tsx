@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { Manrope, Space_Grotesk } from "next/font/google";
@@ -66,11 +67,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const isMaintenanceMode = headerList.get("x-cardpulse-maintenance") === "1";
+
   return (
     <html lang="en">
       <body
@@ -78,35 +82,41 @@ export default function RootLayout({
       >
         <ToastProvider>
           <CartProvider>
-            <div className="mx-auto min-h-screen max-w-7xl px-4 pb-32 pt-1.5 sm:px-6 lg:px-8">
-              <header className="z-20 mb-3 rounded-[1.1rem] border border-white/10 bg-white/5 px-2.5 py-1 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-sm md:sticky md:top-2 sm:px-3.5">
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5">
-                  <nav className="flex items-center justify-start text-sm font-medium text-slate-300">
-                    <Link
-                      href="/browse"
-                      className="rounded-full px-2 py-0.5 hover:bg-white/10 sm:px-2.5"
-                    >
-                      Browse
+            <div
+              className={`mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 ${
+                isMaintenanceMode ? "py-8" : "pb-32 pt-1.5"
+              }`}
+            >
+              {!isMaintenanceMode ? (
+                <header className="z-20 mb-3 rounded-[1.1rem] border border-white/10 bg-white/5 px-2.5 py-1 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-sm md:sticky md:top-2 sm:px-3.5">
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5">
+                    <nav className="flex items-center justify-start text-sm font-medium text-slate-300">
+                      <Link
+                        href="/browse"
+                        className="rounded-full px-2 py-0.5 hover:bg-white/10 sm:px-2.5"
+                      >
+                        Browse
+                      </Link>
+                    </nav>
+                    <Link href="/" className="flex min-w-0 items-center justify-center">
+                      <Image
+                        src="/brand/cardpulse-logo.png"
+                        alt="CardPulse"
+                        width={208}
+                        height={64}
+                        priority
+                        className="h-auto w-[92px] object-contain sm:w-[156px]"
+                      />
                     </Link>
-                  </nav>
-                  <Link href="/" className="flex min-w-0 items-center justify-center">
-                    <Image
-                      src="/brand/cardpulse-logo.png"
-                      alt="CardPulse"
-                      width={208}
-                      height={64}
-                      priority
-                      className="h-auto w-[92px] object-contain sm:w-[156px]"
-                    />
-                  </Link>
-                  <nav className="flex items-center justify-end gap-1 text-sm font-medium text-slate-300 sm:gap-2">
-                    <CartLink />
-                  </nav>
-                </div>
-              </header>
+                    <nav className="flex items-center justify-end gap-1 text-sm font-medium text-slate-300 sm:gap-2">
+                      <CartLink />
+                    </nav>
+                  </div>
+                </header>
+              ) : null}
               {children}
             </div>
-            <CartDock />
+            {!isMaintenanceMode ? <CartDock /> : null}
           </CartProvider>
         </ToastProvider>
       </body>

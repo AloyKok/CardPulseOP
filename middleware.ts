@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { updateSession } from "@/utils/supabase/middleware";
 
+const MAINTENANCE_MODE = true;
+
 function unauthorizedResponse() {
   return new NextResponse("Authentication required.", {
     status: 401,
@@ -18,6 +20,23 @@ function configurationErrorResponse() {
 }
 
 export async function middleware(request: NextRequest) {
+  if (
+    MAINTENANCE_MODE &&
+    request.nextUrl.pathname !== "/maintenance" &&
+    !request.nextUrl.pathname.startsWith("/_next") &&
+    !request.nextUrl.pathname.startsWith("/api")
+  ) {
+    const maintenanceUrl = new URL("/maintenance", request.url);
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-cardpulse-maintenance", "1");
+
+    return NextResponse.rewrite(maintenanceUrl, {
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
   if (!request.nextUrl.pathname.startsWith("/admin")) {
     return updateSession(request);
   }
@@ -52,5 +71,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };
