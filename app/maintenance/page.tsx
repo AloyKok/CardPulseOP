@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -14,6 +15,16 @@ export default function MaintenancePage() {
   return (
     <main className="flex min-h-[70vh] items-center justify-center py-10">
       <section className="w-full max-w-2xl rounded-[2rem] border border-white/10 bg-white/5 px-6 py-10 text-center shadow-[0_24px_64px_rgba(0,0,0,0.38)] backdrop-blur-sm sm:px-10">
+        <div className="flex justify-center">
+          <Image
+            src="/brand/cardpulse-logo.png"
+            alt="CardPulse"
+            width={320}
+            height={98}
+            priority
+            className="h-auto w-[150px] object-contain sm:w-[220px]"
+          />
+        </div>
         <p className="text-xs font-bold uppercase tracking-[0.32em] text-slate-400">
           Temporary Downtime
         </p>
