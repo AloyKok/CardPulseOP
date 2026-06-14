@@ -4,22 +4,12 @@ import { updateSession } from "@/utils/supabase/middleware";
 
 const MAINTENANCE_MODE = true;
 
-function unauthorizedResponse() {
-  return new NextResponse("Authentication required.", {
-    status: 401,
-    headers: {
-      "WWW-Authenticate": 'Basic realm="CardPulse Admin"',
-    },
-  });
-}
-
-function configurationErrorResponse() {
-  return new NextResponse("Admin credentials are not configured.", {
-    status: 500,
-  });
-}
-
 export async function middleware(request: NextRequest) {
+  // The inventory admin is hosted separately and enforces its own Supabase auth.
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
   if (
     MAINTENANCE_MODE &&
     request.nextUrl.pathname !== "/maintenance" &&
@@ -35,36 +25,6 @@ export async function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     });
-  }
-
-  if (!request.nextUrl.pathname.startsWith("/admin")) {
-    return updateSession(request);
-  }
-
-  const authHeader = request.headers.get("authorization");
-
-  if (!authHeader?.startsWith("Basic ")) {
-    return unauthorizedResponse();
-  }
-
-  let decoded = "";
-
-  try {
-    decoded = atob(authHeader.split(" ")[1] || "");
-  } catch {
-    return unauthorizedResponse();
-  }
-
-  const [username, password] = decoded.split(":");
-  const expectedUsername = process.env.ADMIN_USERNAME;
-  const expectedPassword = process.env.ADMIN_PASSWORD;
-
-  if (!expectedUsername || !expectedPassword) {
-    return configurationErrorResponse();
-  }
-
-  if (username !== expectedUsername || password !== expectedPassword) {
-    return unauthorizedResponse();
   }
 
   return updateSession(request);
